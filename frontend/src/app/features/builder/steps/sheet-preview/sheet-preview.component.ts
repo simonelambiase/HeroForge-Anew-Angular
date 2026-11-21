@@ -3,6 +3,14 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { CharacterService } from '../../../../core/services/character.service';
 import { ABILITY_ORDER, formatModifier, type AbilityName } from '../../../../core/models/ability-scores.model';
 import { CLASSES } from '../../../../core/models/class.model';
+import {
+  CLASS_IDS_WITH_OPTIONS,
+  MONK_STYLES,
+  RAGE_VARIANTS,
+  domainName,
+  familiarName,
+  schoolName,
+} from '../../../../core/models/class-options.model';
 import type { CharacterSheet } from '../../../../core/models/character.model';
 import { BadgeIndicatorComponent } from '../../../../shared/components/badge-indicator/badge-indicator.component';
 
@@ -34,6 +42,10 @@ export class SheetPreviewComponent {
   readonly reflex = computed(() => this.formatSigned(this.service.savingThrows().reflex));
   readonly will = computed(() => this.formatSigned(this.service.savingThrows().will));
 
+  readonly classLevelsWithOptions = computed(() =>
+    this.service.classLevels().filter((classLevel) => CLASS_IDS_WITH_OPTIONS.includes(classLevel.classId)),
+  );
+
   updateName(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.service.setCharacterName(target.value);
@@ -49,6 +61,50 @@ export class SheetPreviewComponent {
 
   className(classId: string): string {
     return CLASSES.find((characterClass) => characterClass.id === classId)?.name ?? classId;
+  }
+
+  classOptionsSummary(classId: string): string {
+    const options = this.service.classOptions();
+
+    switch (classId) {
+      case 'cleric': {
+        const domains = options.cleric.domains.map(domainName).join(', ') || '—';
+        const channeling = options.cleric.channeling === 'turn' ? 'Scacciare' : 'Intimorire';
+        return `Divinità: ${options.cleric.deity} | Domini: ${domains} | ${channeling}`;
+      }
+      case 'wizard': {
+        const specialization = schoolName(options.wizard.specialization);
+        const prohibited = options.wizard.prohibitedSchools.map(schoolName).join(', ');
+        const familiar = options.wizard.familiar ? familiarName(options.wizard.familiar) : '—';
+        const prohibitedText = prohibited ? ` (Proibite: ${prohibited})` : '';
+        return `Scuola: ${specialization}${prohibitedText} | Familiare: ${familiar}`;
+      }
+      case 'ranger': {
+        const style =
+          options.ranger.combatStyle === 'archery'
+            ? 'Tiro con l\u2019Arco'
+            : 'Combattere con Due Armi';
+        const enemy = options.ranger.favoredEnemy || '—';
+        const companion = options.ranger.animalCompanion || '—';
+        return `Stile: ${style} | Nemico prescelto: ${enemy} | Compagno: ${companion}`;
+      }
+      case 'barbarian': {
+        const variant =
+          RAGE_VARIANTS.find((item) => item.id === options.barbarian.rageVariant)?.name ??
+          options.barbarian.rageVariant;
+        return `Ira: ${variant}`;
+      }
+      case 'druid': {
+        return `Compagno animale: ${options.druid.animalCompanion || '—'}`;
+      }
+      case 'monk': {
+        const style =
+          MONK_STYLES.find((item) => item.id === options.monk.monkStyle)?.name ?? options.monk.monkStyle;
+        return `Stile: ${style}`;
+      }
+      default:
+        return '';
+    }
   }
 
   toJson(): CharacterSheet {

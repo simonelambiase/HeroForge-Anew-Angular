@@ -183,4 +183,88 @@ describe('CharacterService', () => {
     service.toggleArmor(hideArmor);
     expect(service.totalSkills().find((total) => total.skill.id === 'climb')?.total).toBe(1);
   });
+
+  it('should store cleric options', () => {
+    service.addClass('cleric');
+    service.setClericOptions({ deity: 'Pelor', domains: ['sun', 'healing'], channeling: 'turn' });
+
+    expect(service.classOptions().cleric.deity).toBe('Pelor');
+    expect(service.classOptions().cleric.domains).toEqual(['sun', 'healing']);
+    expect(service.classOptions().cleric.channeling).toBe('turn');
+  });
+
+  it('should store wizard options', () => {
+    service.addClass('wizard');
+    service.setWizardOptions({
+      specialization: 'evocation',
+      prohibitedSchools: ['necromancy', 'conjuration'],
+      familiar: 'owl',
+    });
+
+    expect(service.classOptions().wizard.specialization).toBe('evocation');
+    expect(service.classOptions().wizard.prohibitedSchools).toEqual(['necromancy', 'conjuration']);
+    expect(service.classOptions().wizard.familiar).toBe('owl');
+  });
+
+  it('should store ranger, barbarian, druid and monk options', () => {
+    service.setRangerOptions({ combatStyle: 'two-weapon', favoredEnemy: 'Non Morti', animalCompanion: 'Lupo' });
+    service.setBarbarianOptions({ rageVariant: 'whirling-frenzy' });
+    service.setDruidOptions({ animalCompanion: 'Aquila' });
+    service.setMonkOptions({ monkStyle: 'stunning' });
+
+    expect(service.classOptions().ranger.combatStyle).toBe('two-weapon');
+    expect(service.classOptions().ranger.favoredEnemy).toBe('Non Morti');
+    expect(service.classOptions().ranger.animalCompanion).toBe('Lupo');
+    expect(service.classOptions().barbarian.rageVariant).toBe('whirling-frenzy');
+    expect(service.classOptions().druid.animalCompanion).toBe('Aquila');
+    expect(service.classOptions().monk.monkStyle).toBe('stunning');
+  });
+
+  it('should treat knowledge skills as class skills with the Knowledge domain', () => {
+    service.addClass('cleric');
+    service.setClericOptions({ domains: ['knowledge'] });
+
+    expect(service.isClassSkill('knowledge-arcana')).toBe(true);
+    expect(service.maxRanksFor('knowledge-arcana')).toBe(service.maxClassSkillRanks());
+  });
+
+  it('should not treat knowledge skills as class skills without the Knowledge domain', () => {
+    service.addClass('cleric');
+
+    expect(service.isClassSkill('knowledge-arcana')).toBe(false);
+  });
+
+  it('should add +3 hit points for a Toad familiar', () => {
+    service.addClass('wizard');
+    const before = service.totalHitPoints();
+
+    service.setWizardOptions({ familiar: 'toad' });
+
+    expect(service.totalHitPoints()).toBe(before + 3);
+  });
+
+  it('should add +2 fortitude for a Rat familiar', () => {
+    service.addClass('wizard');
+    const before = service.savingThrows().fortitude;
+
+    service.setWizardOptions({ familiar: 'rat' });
+
+    expect(service.savingThrows().fortitude).toBe(before + 2);
+  });
+
+  it('should add +2 reflex for a Weasel familiar', () => {
+    service.addClass('wizard');
+    const before = service.savingThrows().reflex;
+
+    service.setWizardOptions({ familiar: 'weasel' });
+
+    expect(service.savingThrows().reflex).toBe(before + 2);
+  });
+
+  it('should ignore familiar bonuses without wizard levels', () => {
+    service.setWizardOptions({ familiar: 'toad' });
+
+    expect(service.totalHitPoints()).toBe(0);
+    expect(service.savingThrows().fortitude).toBe(0);
+  });
 });

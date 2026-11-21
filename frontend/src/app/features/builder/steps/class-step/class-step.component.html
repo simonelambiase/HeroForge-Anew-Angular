@@ -1,7 +1,20 @@
 <div class="class-step">
   <app-card-panel title="Scegli le classi" [collapsible]="false">
+    <div class="category-tabs">
+      @for (category of categories; track category.id) {
+        <button
+          type="button"
+          class="category-tab"
+          [class.active]="activeCategory() === category.id"
+          (click)="selectCategory(category.id)"
+        >
+          {{ category.label }}
+        </button>
+      }
+    </div>
+
     <div class="class-grid">
-      @for (characterClass of classes; track characterClass.id) {
+      @for (characterClass of visibleClasses(); track characterClass.id) {
         <app-selector-card
           [title]="characterClass.name"
           [description]="classDescription(characterClass)"
@@ -32,4 +45,216 @@
       </ul>
     }
   </app-card-panel>
+
+  @if (classLevelsWithOptions().length > 0) {
+    <app-card-panel title="Opzioni e Specializzazioni di Classe" [collapsible]="false">
+      <div class="options-list">
+        @for (classLevel of classLevelsWithOptions(); track classLevel.classId) {
+          <section class="option-card">
+            <h3 class="option-title">{{ className(classLevel.classId) }}</h3>
+
+            @switch (classLevel.classId) {
+              @case ('cleric') {
+                <div class="field">
+                  <label class="field-label" for="cleric-deity">Divinità</label>
+                  <select
+                    id="cleric-deity"
+                    [value]="service.classOptions().cleric.deity"
+                    (change)="setClericDeity($event)"
+                  >
+                    @for (deity of deities; track deity) {
+                      <option [value]="deity">{{ deity }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="field">
+                  <span class="field-label">Domini (max 2)</span>
+                  <div class="checkbox-grid">
+                    @for (domain of domains; track domain.id) {
+                      <label class="check" [title]="domain.description">
+                        <input
+                          type="checkbox"
+                          [checked]="isDomainSelected(domain.id)"
+                          (change)="toggleDomain(domain.id)"
+                        />
+                        <span>{{ domain.name }}</span>
+                      </label>
+                    }
+                  </div>
+                </div>
+
+                <div class="field">
+                  <span class="field-label">Energia</span>
+                  <div class="radio-row">
+                    <label class="check">
+                      <input
+                        type="radio"
+                        name="cleric-channeling"
+                        value="turn"
+                        [checked]="service.classOptions().cleric.channeling === 'turn'"
+                        (change)="setClericChanneling($event)"
+                      />
+                      <span>Scacciare</span>
+                    </label>
+                    <label class="check">
+                      <input
+                        type="radio"
+                        name="cleric-channeling"
+                        value="rebuke"
+                        [checked]="service.classOptions().cleric.channeling === 'rebuke'"
+                        (change)="setClericChanneling($event)"
+                      />
+                      <span>Intimorire</span>
+                    </label>
+                  </div>
+                </div>
+              }
+
+              @case ('wizard') {
+                <div class="field">
+                  <label class="field-label" for="wizard-specialization">Scuola specialistica</label>
+                  <select
+                    id="wizard-specialization"
+                    [value]="service.classOptions().wizard.specialization"
+                    (change)="setWizardSpecialization($event)"
+                  >
+                    <option value="generalist">Generalista</option>
+                    @for (school of magicSchools; track school.id) {
+                      <option [value]="school.id">{{ school.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                @if (service.classOptions().wizard.specialization !== 'generalist') {
+                  <div class="field">
+                    <span class="field-label">Scuole proibite (max {{ prohibitedSchoolLimit() }})</span>
+                    <div class="checkbox-grid">
+                      @for (school of magicSchools; track school.id) {
+                        <label class="check">
+                          <input
+                            type="checkbox"
+                            [checked]="isProhibitedSchool(school.id)"
+                            (change)="toggleProhibitedSchool(school.id)"
+                          />
+                          <span>{{ school.name }}</span>
+                        </label>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <div class="field">
+                  <label class="field-label" for="wizard-familiar">Familiare</label>
+                  <select
+                    id="wizard-familiar"
+                    [value]="service.classOptions().wizard.familiar"
+                    (change)="setFamiliar($event)"
+                  >
+                    <option value="">Nessuno</option>
+                    @for (familiar of familiars; track familiar.id) {
+                      <option [value]="familiar.id">{{ familiar.name }} ({{ familiar.bonus }})</option>
+                    }
+                  </select>
+                </div>
+              }
+
+              @case ('ranger') {
+                <div class="field">
+                  <label class="field-label" for="ranger-style">Stile di combattimento</label>
+                  <select
+                    id="ranger-style"
+                    [value]="service.classOptions().ranger.combatStyle"
+                    (change)="setRangerCombatStyle($event)"
+                  >
+                    @for (style of combatStyles; track style.id) {
+                      <option [value]="style.id">{{ style.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="ranger-enemy">Nemico prescelto</label>
+                  <select
+                    id="ranger-enemy"
+                    [value]="service.classOptions().ranger.favoredEnemy"
+                    (change)="setRangerFavoredEnemy($event)"
+                  >
+                    <option value="">Seleziona...</option>
+                    @for (enemy of favoredEnemies; track enemy) {
+                      <option [value]="enemy">{{ enemy }}</option>
+                    }
+                  </select>
+                </div>
+
+                @if (classLevel.level >= 4) {
+                  <div class="field">
+                    <label class="field-label" for="ranger-companion">Compagno animale</label>
+                    <select
+                      id="ranger-companion"
+                      [value]="service.classOptions().ranger.animalCompanion"
+                      (change)="setRangerAnimalCompanion($event)"
+                    >
+                      <option value="">Seleziona...</option>
+                      @for (companion of rangerCompanions; track companion) {
+                        <option [value]="companion">{{ companion }}</option>
+                      }
+                    </select>
+                  </div>
+                }
+              }
+
+              @case ('barbarian') {
+                <div class="field">
+                  <label class="field-label" for="barbarian-rage">Stile d'ira / Totem</label>
+                  <select
+                    id="barbarian-rage"
+                    [value]="service.classOptions().barbarian.rageVariant"
+                    (change)="setRageVariant($event)"
+                  >
+                    @for (variant of rageVariants; track variant.id) {
+                      <option [value]="variant.id">{{ variant.name }}</option>
+                    }
+                  </select>
+                  <p class="hint">{{ rageDescription() }}</p>
+                </div>
+              }
+
+              @case ('druid') {
+                <div class="field">
+                  <label class="field-label" for="druid-companion">Compagno animale</label>
+                  <select
+                    id="druid-companion"
+                    [value]="service.classOptions().druid.animalCompanion"
+                    (change)="setDruidAnimalCompanion($event)"
+                  >
+                    <option value="">Seleziona...</option>
+                    @for (companion of druidCompanions; track companion) {
+                      <option [value]="companion">{{ companion }}</option>
+                    }
+                  </select>
+                </div>
+              }
+
+              @case ('monk') {
+                <div class="field">
+                  <label class="field-label" for="monk-style">Stile marziale</label>
+                  <select
+                    id="monk-style"
+                    [value]="service.classOptions().monk.monkStyle"
+                    (change)="setMonkStyle($event)"
+                  >
+                    @for (style of monkStyles; track style.id) {
+                      <option [value]="style.id">{{ style.name }}</option>
+                    }
+                  </select>
+                  <p class="hint">{{ monkDescription() }}</p>
+                </div>
+              }
+            }
+          </section>
+        }
+      </div>
+    </app-card-panel>
+  }
 </div>

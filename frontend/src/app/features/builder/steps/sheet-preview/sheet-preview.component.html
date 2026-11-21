@@ -62,6 +62,17 @@
     }
   </section>
 
+  @if (classLevelsWithOptions().length > 0) {
+    <section class="sheet-section">
+      <h2>Opzioni di Classe</h2>
+      <ul class="class-list">
+        @for (classLevel of classLevelsWithOptions(); track classLevel.classId) {
+          <li><strong>{{ className(classLevel.classId) }}</strong>: {{ classOptionsSummary(classLevel.classId) }}</li>
+        }
+      </ul>
+    </section>
+  }
+
   <section class="sheet-section">
     <h2>Tiri salvezza</h2>
     <ul class="save-list">

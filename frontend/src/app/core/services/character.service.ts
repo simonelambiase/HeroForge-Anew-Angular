@@ -15,6 +15,20 @@ import {
   CLASSES,
   type CharacterClass,
 } from '../models/class.model';
+import {
+  DEFAULT_CLASS_OPTIONS,
+  KNOWLEDGE_DOMAIN_ID,
+  RAT_FAMILIAR_ID,
+  TOAD_FAMILIAR_ID,
+  WEASEL_FAMILIAR_ID,
+  type BarbarianOptions,
+  type CharacterClassOptions,
+  type ClericOptions,
+  type DruidOptions,
+  type MonkOptions,
+  type RangerOptions,
+  type WizardOptions,
+} from '../models/class-options.model';
 import type { ClassLevel } from '../models/character.model';
 import { SKILLS, skillSizeModifier, skillSynergyBonus, type SkillTotal } from '../models/skill.model';
 import {
@@ -40,6 +54,7 @@ export class CharacterService {
   private readonly _selectedFeats = signal<string[]>([]);
   private readonly _equippedWeapons = signal<Weapon[]>([]);
   private readonly _equippedArmor = signal<Armor | null>(null);
+  private readonly _classOptions = signal<CharacterClassOptions>({ ...DEFAULT_CLASS_OPTIONS });
 
   readonly characterName = this._characterName.asReadonly();
   readonly abilities = this._abilities.asReadonly();
@@ -49,6 +64,7 @@ export class CharacterService {
   readonly selectedFeats = this._selectedFeats.asReadonly();
   readonly equippedWeapons = this._equippedWeapons.asReadonly();
   readonly equippedArmor = this._equippedArmor.asReadonly();
+  readonly classOptions = this._classOptions.asReadonly();
 
   readonly finalAbilities = computed<Record<AbilityName, AbilityScore>>(() => {
     const base = this._abilities();
@@ -125,10 +141,11 @@ export class CharacterService {
   readonly savingThrows = computed<SavingThrows>(() => {
     const base = this.baseSavingThrows();
     const modifiers = this.abilityModifiers();
+    const familiarBonus = this.familiarSavingBonus();
 
     return {
-      fortitude: base.fortitude + modifiers.CON.modifier,
-      reflex: base.reflex + modifiers.DEX.modifier,
+      fortitude: base.fortitude + modifiers.CON.modifier + familiarBonus.fortitude,
+      reflex: base.reflex + modifiers.DEX.modifier + familiarBonus.reflex,
       will: base.will + modifiers.WIS.modifier,
     };
   });
@@ -322,7 +339,12 @@ export class CharacterService {
       }
     }
 
-    return hitPoints;
+    const toadBonus =
+      this.hasClassLevels('wizard') && this._classOptions().wizard.familiar === TOAD_FAMILIAR_ID
+        ? 3
+        : 0;
+
+    return hitPoints + toadBonus;
   });
 
   setCharacterName(name: string): void {
@@ -401,10 +423,56 @@ export class CharacterService {
     this._equippedArmor.update((current) => (current?.id === armor.id ? null : armor));
   }
 
+  setClericOptions(options: Partial<ClericOptions>): void {
+    this._classOptions.update((current) => ({
+      ...current,
+      cleric: { ...current.cleric, ...options },
+    }));
+  }
+
+  setWizardOptions(options: Partial<WizardOptions>): void {
+    this._classOptions.update((current) => ({
+      ...current,
+      wizard: { ...current.wizard, ...options },
+    }));
+  }
+
+  setRangerOptions(options: Partial<RangerOptions>): void {
+    this._classOptions.update((current) => ({
+      ...current,
+      ranger: { ...current.ranger, ...options },
+    }));
+  }
+
+  setBarbarianOptions(options: Partial<BarbarianOptions>): void {
+    this._classOptions.update((current) => ({
+      ...current,
+      barbarian: { ...current.barbarian, ...options },
+    }));
+  }
+
+  setDruidOptions(options: Partial<DruidOptions>): void {
+    this._classOptions.update((current) => ({
+      ...current,
+      druid: { ...current.druid, ...options },
+    }));
+  }
+
+  setMonkOptions(options: Partial<MonkOptions>): void {
+    this._classOptions.update((current) => ({
+      ...current,
+      monk: { ...current.monk, ...options },
+    }));
+  }
+
   isClassSkill(skillId: string): boolean {
     const skill = SKILLS.find((candidate) => candidate.id === skillId);
     if (!skill) {
       return false;
+    }
+
+    if (skillId.startsWith('knowledge-') && this.hasKnowledgeDomain()) {
+      return true;
     }
 
     return this._classLevels().some((classLevel) => {
@@ -417,6 +485,29 @@ export class CharacterService {
     return this.isClassSkill(skillId)
       ? this.maxClassSkillRanks()
       : this.maxCrossClassSkillRanks();
+  }
+
+  hasClassLevels(classId: string): boolean {
+    return this._classLevels().some((classLevel) => classLevel.classId === classId);
+  }
+
+  private hasKnowledgeDomain(): boolean {
+    return (
+      this.hasClassLevels('cleric') &&
+      this._classOptions().cleric.domains.includes(KNOWLEDGE_DOMAIN_ID)
+    );
+  }
+
+  private familiarSavingBonus(): { fortitude: number; reflex: number } {
+    if (!this.hasClassLevels('wizard')) {
+      return { fortitude: 0, reflex: 0 };
+    }
+
+    const familiar = this._classOptions().wizard.familiar;
+    return {
+      fortitude: familiar === RAT_FAMILIAR_ID ? 2 : 0,
+      reflex: familiar === WEASEL_FAMILIAR_ID ? 2 : 0,
+    };
   }
 
   private findClass(classId: string): CharacterClass | undefined {
