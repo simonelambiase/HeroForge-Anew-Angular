@@ -1,26 +1,43 @@
 <div class="builder-shell">
   <header class="builder-header">
     <div class="header-text">
-      <h1>Hakrom</h1>
-      <p>Creatore Personaggio D&amp;D 3.5</p>
+      <h1>{{ i18n.t('shell.title') }}</h1>
+      <p>{{ i18n.t('shell.subtitle') }}</p>
     </div>
-    <button type="button" class="ai-assistant-btn" (click)="toggleAiPanel()">
-      AI Assistant
-      @if (!aiService.isConfigured()) {
-        <span class="config-badge">Configura</span>
-      }
-    </button>
+
+    <div class="header-actions">
+      <div class="language-selector" role="group" [attr.aria-label]="i18n.t('language.label')">
+        @for (option of i18n.languageOptions; track option.code) {
+          <button
+            type="button"
+            class="language-btn"
+            [class.active]="i18n.currentLang() === option.code"
+            (click)="setLanguage(option.code)"
+            [attr.title]="option.label"
+          >
+            {{ option.shortLabel }}
+          </button>
+        }
+      </div>
+
+      <button type="button" class="ai-assistant-btn" (click)="toggleAiPanel()">
+        {{ i18n.t('shell.aiAssistant') }}
+        @if (!aiService.isConfigured()) {
+          <span class="config-badge">{{ i18n.t('shell.configure') }}</span>
+        }
+      </button>
+    </div>
   </header>
 
-  <app-step-stepper [steps]="stepLabels" [(currentStep)]="currentStep" />
+  <app-step-stepper [steps]="stepLabels()" [(currentStep)]="currentStep" />
 
-  <section class="preview-bar" aria-label="Anteprima rapida">
-    <app-badge-indicator label="BAB" [value]="bab()" variant="bab" />
-    <app-badge-indicator label="CA" [value]="armorClass()" variant="ac" />
-    <app-badge-indicator label="Tempra" [value]="fortitude()" variant="save" />
-    <app-badge-indicator label="Riflessi" [value]="reflex()" variant="save" />
-    <app-badge-indicator label="Volontà" [value]="will()" variant="save" />
-    <app-badge-indicator label="PF" [value]="hitPoints()" variant="hp" />
+  <section class="preview-bar" [attr.aria-label]="i18n.t('shell.quickPreview')">
+    <app-badge-indicator [label]="badgeLabels().bab" [value]="bab()" variant="bab" />
+    <app-badge-indicator [label]="badgeLabels().ac" [value]="armorClass()" variant="ac" />
+    <app-badge-indicator [label]="badgeLabels().fortitude" [value]="fortitude()" variant="save" />
+    <app-badge-indicator [label]="badgeLabels().reflex" [value]="reflex()" variant="save" />
+    <app-badge-indicator [label]="badgeLabels().will" [value]="will()" variant="save" />
+    <app-badge-indicator [label]="badgeLabels().hp" [value]="hitPoints()" variant="hp" />
   </section>
 
   <main class="builder-content">
@@ -51,15 +68,15 @@
 
   <footer class="builder-footer">
     <button type="button" class="nav-btn" [disabled]="currentStep() === 0" (click)="previous()">
-      Indietro
+      {{ i18n.t('shell.previous') }}
     </button>
     <button
       type="button"
       class="nav-btn primary"
-      [disabled]="currentStep() === stepLabels.length - 1"
+      [disabled]="currentStep() === stepLabels().length - 1"
       (click)="next()"
     >
-      Avanti
+      {{ i18n.t('shell.next') }}
     </button>
   </footer>
 

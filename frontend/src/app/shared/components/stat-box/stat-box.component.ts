@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from '@angular/core';
 
+import { I18nService } from '../../../core/services/i18n.service';
 import {
   calculateAbilityModifier,
   formatModifier,
@@ -15,6 +16,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatBoxComponent {
+  readonly i18n = inject(I18nService);
+
   readonly name = input.required<AbilityName>();
   readonly label = input.required<string>();
   readonly score = model.required<number>();
@@ -28,6 +31,8 @@ export class StatBoxComponent {
   readonly modifier = computed(() => calculateAbilityModifier(this.total()));
   readonly modifierLabel = computed(() => formatModifier(this.modifier()));
   readonly racialBonusLabel = computed(() => formatModifier(this.racialBonus()));
+  readonly decreaseLabel = computed(() => `${this.i18n.t('abilities.decrease')} ${this.label()}`);
+  readonly increaseLabel = computed(() => `${this.i18n.t('abilities.increase')} ${this.label()}`);
 
   increment(): void {
     if (!this.canIncrement()) {

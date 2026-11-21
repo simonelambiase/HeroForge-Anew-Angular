@@ -7,7 +7,7 @@
       class="stat-btn"
       [disabled]="!canDecrement()"
       (click)="decrement()"
-      [attr.aria-label]="'Diminuisci ' + label()"
+      [attr.aria-label]="decreaseLabel()"
     >
       −
     </button>
@@ -17,7 +17,7 @@
       class="stat-btn"
       [disabled]="!canIncrement()"
       (click)="increment()"
-      [attr.aria-label]="'Aumenta ' + label()"
+      [attr.aria-label]="increaseLabel()"
     >
       +
     </button>
@@ -27,7 +27,7 @@
 
   @if (racialBonus() !== 0) {
     <span class="racial-bonus" [class.negative]="racialBonus() < 0">
-      Razza {{ racialBonusLabel() }}
+      {{ i18n.t('abilities.race') }} {{ racialBonusLabel() }}
     </span>
   }
 </div>

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../core/services/character.service';
+import { I18nService, type SupportedLanguage } from '../../../core/services/i18n.service';
 import { OpenRouterService } from '../../../core/services/openrouter.service';
 import { BadgeIndicatorComponent } from '../../../shared/components/badge-indicator/badge-indicator.component';
 import { StepStepperComponent } from '../../../shared/components/step-stepper/step-stepper.component';
@@ -35,15 +36,27 @@ import { SheetPreviewComponent } from '../steps/sheet-preview/sheet-preview.comp
 export class BuilderShellComponent {
   readonly service = inject(CharacterService);
   readonly aiService = inject(OpenRouterService);
-  readonly stepLabels = [
-    'Caratteristiche',
-    'Razza',
-    'Classe',
-    'Abilità',
-    'Talenti',
-    'Equipaggiamento',
-    'Scheda Finale',
-  ];
+  readonly i18n = inject(I18nService);
+
+  readonly stepLabels = computed(() => [
+    this.i18n.t('stepper.abilities'),
+    this.i18n.t('stepper.race'),
+    this.i18n.t('stepper.class'),
+    this.i18n.t('stepper.skills'),
+    this.i18n.t('stepper.feats'),
+    this.i18n.t('stepper.equipment'),
+    this.i18n.t('stepper.sheet'),
+  ]);
+
+  readonly badgeLabels = computed(() => ({
+    bab: this.i18n.t('badges.bab'),
+    ac: this.i18n.t('badges.ac'),
+    fortitude: this.i18n.t('badges.fortitude'),
+    reflex: this.i18n.t('badges.reflex'),
+    will: this.i18n.t('badges.will'),
+    hp: this.i18n.t('badges.hp'),
+  }));
+
   readonly currentStep = signal<number>(0);
   readonly aiPanelOpen = signal<boolean>(false);
 
@@ -59,7 +72,11 @@ export class BuilderShellComponent {
   }
 
   next(): void {
-    this.currentStep.update((value) => Math.min(this.stepLabels.length - 1, value + 1));
+    this.currentStep.update((value) => Math.min(this.stepLabels().length - 1, value + 1));
+  }
+
+  setLanguage(language: SupportedLanguage): void {
+    this.i18n.setLanguage(language);
   }
 
   toggleAiPanel(): void {

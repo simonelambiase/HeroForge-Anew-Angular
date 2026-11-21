@@ -1,13 +1,13 @@
-<app-card-panel title="Punteggi di caratteristica" [collapsible]="false">
+<app-card-panel [title]="i18n.t('abilities.title')" [collapsible]="false">
   <div class="controls">
-    <div class="method-switch" role="group" aria-label="Metodo di generazione">
+    <div class="method-switch" role="group" [attr.aria-label]="i18n.t('abilities.generationMethod')">
       <button
         type="button"
         class="method-btn"
         [class.active]="method() === 'pointBuy'"
         (click)="setMethod('pointBuy')"
       >
-        Point Buy
+        {{ i18n.t('abilities.pointBuy') }}
       </button>
       <button
         type="button"
@@ -15,13 +15,13 @@
         [class.active]="method() === 'manual'"
         (click)="setMethod('manual')"
       >
-        Manuale
+        {{ i18n.t('abilities.manual') }}
       </button>
     </div>
 
     @if (method() === 'pointBuy') {
       <div class="budget-row">
-        <span class="budget-label">Budget punti</span>
+        <span class="budget-label">{{ i18n.t('abilities.pointBudget') }}</span>
         <div class="budget-presets">
           @for (preset of pointBuyPresets; track preset) {
             <button
@@ -35,7 +35,7 @@
           }
         </div>
         <span class="remaining" [class.negative]="remainingPoints() < 0">
-          Punti rimanenti: {{ remainingPoints() }}
+          {{ i18n.t('abilities.remainingPoints') }}: {{ remainingPoints() }}
         </span>
       </div>
     }
@@ -45,7 +45,7 @@
     @for (ability of abilityOrder; track ability) {
       <app-stat-box
         [name]="ability"
-        [label]="abilityLabels[ability]"
+        [label]="abilityLabels()[ability]"
         [score]="service.abilities()[ability]"
         (scoreChange)="setAbility(ability, $event)"
         [racialBonus]="racialBonusFor(ability)"

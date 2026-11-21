@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import {
   ABILITY_ORDER,
   calculatePointBuyCost,
@@ -25,6 +26,7 @@ type AbilityMethod = 'pointBuy' | 'manual';
 })
 export class AbilitiesStepComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly abilityOrder = ABILITY_ORDER;
   readonly pointBuyPresets = POINT_BUY_PRESETS;
 
@@ -34,14 +36,14 @@ export class AbilitiesStepComponent {
   readonly minScore = computed(() => (this.method() === 'pointBuy' ? POINT_BUY_MIN : 3));
   readonly maxScore = POINT_BUY_MAX;
 
-  readonly abilityLabels: Record<AbilityName, string> = {
-    STR: 'Forza',
-    DEX: 'Destrezza',
-    CON: 'Costituzione',
-    INT: 'Intelligenza',
-    WIS: 'Saggezza',
-    CHA: 'Carisma',
-  };
+  readonly abilityLabels = computed<Record<AbilityName, string>>(() => ({
+    STR: this.i18n.t('abilities.full.STR'),
+    DEX: this.i18n.t('abilities.full.DEX'),
+    CON: this.i18n.t('abilities.full.CON'),
+    INT: this.i18n.t('abilities.full.INT'),
+    WIS: this.i18n.t('abilities.full.WIS'),
+    CHA: this.i18n.t('abilities.full.CHA'),
+  }));
 
   readonly spentPoints = computed(() => calculatePointBuySpent(this.service.abilities()));
   readonly remainingPoints = computed(() => this.budget() - this.spentPoints());
