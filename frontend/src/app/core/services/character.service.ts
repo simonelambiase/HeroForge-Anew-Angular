@@ -8,7 +8,14 @@ import {
   type AbilityName,
   type AbilityScore,
 } from '../models/ability-scores.model';
-import { SIZE_AC_MODIFIERS, type Race } from '../models/race.model';
+import {
+  isCustomRace,
+  raceSpeeds,
+  SIZE_AC_MODIFIERS,
+  type CustomRace,
+  type RaceSelection,
+  type Speeds,
+} from '../models/race.model';
 import {
   calculateBabForLevel,
   calculateBaseSave,
@@ -48,7 +55,7 @@ export interface SavingThrows {
 export class CharacterService {
   private readonly _characterName = signal('');
   private readonly _abilities = signal<Record<AbilityName, number>>({ ...DEFAULT_ABILITIES });
-  private readonly _selectedRace = signal<Race | null>(null);
+  private readonly _selectedRace = signal<RaceSelection | null>(null);
   private readonly _classLevels = signal<ClassLevel[]>([]);
   private readonly _skillRanks = signal<Record<string, number>>({});
   private readonly _selectedFeats = signal<string[]>([]);
@@ -65,6 +72,13 @@ export class CharacterService {
   readonly equippedWeapons = this._equippedWeapons.asReadonly();
   readonly equippedArmor = this._equippedArmor.asReadonly();
   readonly classOptions = this._classOptions.asReadonly();
+
+  readonly naturalArmor = computed(() => this._selectedRace()?.naturalArmor ?? 0);
+
+  readonly speeds = computed<Speeds>(() => {
+    const race = this._selectedRace();
+    return race ? raceSpeeds(race) : { land: 30 };
+  });
 
   readonly finalAbilities = computed<Record<AbilityName, AbilityScore>>(() => {
     const base = this._abilities();
@@ -158,7 +172,7 @@ export class CharacterService {
     const effectiveDexterity =
       maxDexBonus === null ? dexterityModifier : Math.min(dexterityModifier, maxDexBonus);
 
-    return 10 + effectiveDexterity + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0);
+    return 10 + effectiveDexterity + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0) + this.naturalArmor();
   });
 
   readonly touchArmorClass = computed(() => {
@@ -177,7 +191,7 @@ export class CharacterService {
     const size = this._selectedRace()?.size ?? 'Medium';
     const armor = this._equippedArmor();
 
-    return 10 + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0) + Math.min(0, dexterityModifier);
+    return 10 + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0) + Math.min(0, dexterityModifier) + this.naturalArmor();
   });
 
   readonly defensiveFightingBonus = computed<{ fightingDefensively: number; totalDefense: number }>(
@@ -203,7 +217,7 @@ export class CharacterService {
     }
 
     const intelligenceModifier = Math.max(1, this.abilityModifiers().INT.modifier);
-    const isHuman = this._selectedRace()?.id === 'human';
+    const isHuman = this.isHumanRace();
 
     let points = 0;
     let firstClassLevelProcessed = false;
@@ -256,7 +270,7 @@ export class CharacterService {
       }
     }
 
-    if (this._selectedRace()?.id === 'human') {
+    if (this.isHumanRace()) {
       count += 1;
     }
 
@@ -355,8 +369,12 @@ export class CharacterService {
     this._abilities.update((abilities) => ({ ...abilities, [name]: value }));
   }
 
-  selectRace(race: Race | null): void {
+  selectRace(race: RaceSelection | null): void {
     this._selectedRace.set(race);
+  }
+
+  setCustomRace(customRace: CustomRace): void {
+    this._selectedRace.set(customRace);
   }
 
   addClass(classId: string): void {
@@ -489,6 +507,11 @@ export class CharacterService {
 
   hasClassLevels(classId: string): boolean {
     return this._classLevels().some((classLevel) => classLevel.classId === classId);
+  }
+
+  private isHumanRace(): boolean {
+    const race = this._selectedRace();
+    return race !== null && !isCustomRace(race) && race.id === 'human';
   }
 
   private hasKnowledgeDomain(): boolean {

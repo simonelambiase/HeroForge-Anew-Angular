@@ -4,6 +4,16 @@
   gap: 1rem;
 }
 
+.search-input {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
 .race-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
@@ -17,4 +27,120 @@
 
 .trait-list li {
   margin-bottom: 0.25rem;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}
+
+.field-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.field input,
+.field select,
+.field textarea,
+.custom-form input,
+.custom-form select,
+.custom-form textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.ability-grid,
+.speed-grid,
+.senses-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ability-grid {
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+}
+
+.speed-grid {
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+}
+
+.senses-grid {
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+
+.ability-input,
+.speed-input,
+.sense-input,
+.sense-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.ability-input,
+.speed-input,
+.sense-input {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.sense-check {
+  justify-content: flex-start;
+}
+
+.sense-input-wide {
+  grid-column: 1 / -1;
+}
+
+.ability-input span,
+.speed-input span,
+.sense-input span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.sense-check span {
+  color: var(--color-text);
+}
+
+.sense-check input {
+  width: auto;
+}
+
+.ability-input input,
+.speed-input input,
+.sense-input input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
 }

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { SheetPreviewComponent } from './sheet-preview.component';
 import { CharacterService } from '../../../../core/services/character.service';
-import { RACES } from '../../../../core/models/race.model';
+import { RACES, type Race } from '../../../../core/models/race.model';
 
 describe('SheetPreviewComponent', () => {
   beforeEach(async () => {
@@ -28,7 +28,7 @@ describe('SheetPreviewComponent', () => {
 
     expect(json.name).toBe('Erevan');
     expect(json.baseAbilities.STR).toBe(16);
-    expect(json.race?.id).toBe('elf');
+    expect((json.race as Race).id).toBe('elf');
     expect(json.classLevels).toEqual([{ classId: 'fighter', level: 1 }]);
   });
 

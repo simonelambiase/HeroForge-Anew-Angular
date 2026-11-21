@@ -1,15 +1,185 @@
 <div class="race-step">
   <app-card-panel title="Scegli la razza" [collapsible]="false">
-    <div class="race-grid">
-      @for (race of races; track race.id) {
-        <app-selector-card
-          [title]="race.name"
-          [description]="raceDescription(race)"
-          [badges]="abilityModifierBadges(race)"
-          [selected]="isSelected(race.id)"
-          (selectedChange)="selectRace(race)"
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Cerca razza..."
+      [value]="searchTerm()"
+      (input)="setSearchTerm($event)"
+    />
+
+    @if (filteredRaces().length === 0) {
+      <p class="empty">Nessuna razza trovata.</p>
+    } @else {
+      <div class="race-grid">
+        @for (race of filteredRaces(); track race.id) {
+          <app-selector-card
+            [title]="race.name"
+            [description]="raceDescription(race)"
+            [badges]="abilityModifierBadges(race)"
+            [selected]="isSelected(race.id)"
+            (selectedChange)="selectRace(race)"
+          />
+        }
+      </div>
+    }
+  </app-card-panel>
+
+  <app-card-panel title="Razza personalizzata" [collapsible]="false">
+    <div class="custom-form">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="custom-race-name">Nome</label>
+          <input id="custom-race-name" type="text" [value]="form().name" (input)="setText('name', $event)" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="custom-race-size">Taglia</label>
+          <select id="custom-race-size" [value]="form().size" (change)="setSize($event)">
+            @for (size of sizeOptions; track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="custom-race-favored-class">Classe preferita</label>
+          <input
+            id="custom-race-favored-class"
+            type="text"
+            [value]="form().favoredClass"
+            (input)="setText('favoredClass', $event)"
+          />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="custom-race-type">Tipo</label>
+          <input id="custom-race-type" type="text" [value]="form().type" (input)="setText('type', $event)" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="custom-race-subtype">Sottotipo</label>
+          <input id="custom-race-subtype" type="text" [value]="form().subtype" (input)="setText('subtype', $event)" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="custom-race-hd">Dadi vita razziali</label>
+          <input
+            id="custom-race-hd"
+            type="number"
+            min="0"
+            [value]="form().racialHitDice"
+            (input)="setNumber('racialHitDice', $event)"
+          />
+        </div>
+        <div class="field">
+          <label class="field-label" for="custom-race-natural-armor">CA naturale</label>
+          <input
+            id="custom-race-natural-armor"
+            type="number"
+            [value]="form().naturalArmor"
+            (input)="setNumber('naturalArmor', $event)"
+          />
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Modificatori di caratteristica</span>
+        <div class="ability-grid">
+          @for (ability of abilityOrder; track ability) {
+            <label class="ability-input">
+              <span>{{ abilityLabels[ability] }}</span>
+              <input
+                type="number"
+                [value]="form()[modifierField(ability)]"
+                (input)="setNumber(modifierField(ability), $event)"
+              />
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Velocità (metri)</span>
+        <div class="speed-grid">
+          <label class="speed-input">
+            <span>Terreno</span>
+            <input type="number" min="0" [value]="form().landSpeed" (input)="setNumber('landSpeed', $event)" />
+          </label>
+          <label class="speed-input">
+            <span>Scavare</span>
+            <input type="number" min="0" [value]="form().burrowSpeed" (input)="setNumber('burrowSpeed', $event)" />
+          </label>
+          <label class="speed-input">
+            <span>Scalare</span>
+            <input type="number" min="0" [value]="form().climbSpeed" (input)="setNumber('climbSpeed', $event)" />
+          </label>
+          <label class="speed-input">
+            <span>Volare</span>
+            <input type="number" min="0" [value]="form().flySpeed" (input)="setNumber('flySpeed', $event)" />
+          </label>
+          <label class="speed-input">
+            <span>Nuotare</span>
+            <input type="number" min="0" [value]="form().swimSpeed" (input)="setNumber('swimSpeed', $event)" />
+          </label>
+          <label class="speed-input">
+            <span>Manovrabilità volo</span>
+            <select [value]="form().flyManeuverability" (change)="setFlyManeuverability($event)">
+              @for (maneuverability of flyManeuverabilityOptions; track maneuverability) {
+                <option [value]="maneuverability">{{ maneuverability }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Sensi</span>
+        <div class="senses-grid">
+          <label class="sense-input">
+            <span>Scurovisione (m)</span>
+            <input type="number" min="0" [value]="form().darkvision" (input)="setNumber('darkvision', $event)" />
+          </label>
+          <label class="sense-input">
+            <span>Vista cieca (m)</span>
+            <input type="number" min="0" [value]="form().blindsense" (input)="setNumber('blindsense', $event)" />
+          </label>
+          <label class="sense-input">
+            <span>Percezione cieca (m)</span>
+            <input type="number" min="0" [value]="form().blindsight" (input)="setNumber('blindsight', $event)" />
+          </label>
+          <label class="sense-check">
+            <input type="checkbox" [checked]="form().lowLightVision" (change)="setBoolean('lowLightVision', $event)" />
+            <span>Visione crepuscolare</span>
+          </label>
+          <label class="sense-check">
+            <input type="checkbox" [checked]="form().scent" (change)="setBoolean('scent', $event)" />
+            <span>Fiuto</span>
+          </label>
+          <label class="sense-input sense-input-wide">
+            <span>Altri sensi</span>
+            <input type="text" [value]="form().otherSenses" (input)="setText('otherSenses', $event)" />
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="custom-race-natural-attacks">Attacchi naturali (separati da virgola)</label>
+        <input
+          id="custom-race-natural-attacks"
+          type="text"
+          [value]="form().naturalAttacks"
+          (input)="setText('naturalAttacks', $event)"
         />
-      }
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="custom-race-traits">Tratti razziali (uno per riga)</label>
+        <textarea
+          id="custom-race-traits"
+          rows="4"
+          [value]="form().racialTraits"
+          (input)="setText('racialTraits', $event)"
+        ></textarea>
+      </div>
     </div>
   </app-card-panel>
 

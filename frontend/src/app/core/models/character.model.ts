@@ -1,5 +1,5 @@
 import type { AbilityName } from './ability-scores.model';
-import type { Race } from './race.model';
+import type { RaceSelection } from './race.model';
 import type { Armor, Weapon } from './equipment.model';
 
 export interface ClassLevel {
@@ -10,7 +10,7 @@ export interface ClassLevel {
 export interface CharacterSheet {
   name: string;
   baseAbilities: Record<AbilityName, number>;
-  race: Race | null;
+  race: RaceSelection | null;
   classLevels: ClassLevel[];
   skillRanks: Record<string, number>;
   selectedFeats: string[];
