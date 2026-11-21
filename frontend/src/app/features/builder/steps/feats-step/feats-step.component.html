@@ -1,0 +1,34 @@
+<div class="feats-step">
+  <app-card-panel title="Talenti" [collapsible]="false">
+    <div class="feats-toolbar">
+      <div class="filter-group" role="group" aria-label="Filtra per tipo">
+        @for (type of filters; track type) {
+          <button
+            type="button"
+            class="filter-btn"
+            [class.active]="filter() === type"
+            (click)="filter.set(type)"
+          >
+            {{ type === 'all' ? 'Tutti' : typeLabels[type] }}
+          </button>
+        }
+      </div>
+      <span class="feats-count" [class.negative]="selectedCount() > service.availableFeatsCount()">
+        {{ selectedCount() }} / {{ service.availableFeatsCount() }} talenti
+      </span>
+    </div>
+
+    <div class="feats-grid">
+      @for (feat of filteredFeats(); track feat.id) {
+        <app-selector-card
+          [title]="feat.name"
+          [description]="featDescription(feat)"
+          [badges]="[typeLabels[feat.type]]"
+          [selected]="isSelected(feat.id)"
+          [disabled]="!canToggle(feat.id)"
+          (selectedChange)="toggle(feat)"
+        />
+      }
+    </div>
+  </app-card-panel>
+</div>

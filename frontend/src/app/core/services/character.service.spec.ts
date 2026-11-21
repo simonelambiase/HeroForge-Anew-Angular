@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { CharacterService } from './character.service';
 import { RACES } from '../models/race.model';
+import { WEAPONS, ARMOR } from '../models/equipment.model';
 
 describe('CharacterService', () => {
   let service: CharacterService;
@@ -101,5 +102,85 @@ describe('CharacterService', () => {
 
     service.setClassLevel('fighter', 2);
     expect(service.totalHitPoints()).toBe(17);
+  });
+
+  it('should compute available skill points for first and later levels', () => {
+    service.addClass('wizard');
+    expect(service.availableSkillPoints()).toBe(12);
+
+    service.selectRace(RACES.find((race) => race.id === 'human')!);
+    expect(service.availableSkillPoints()).toBe(16);
+
+    service.setClassLevel('wizard', 2);
+    expect(service.availableSkillPoints()).toBe(20);
+  });
+
+  it('should compute spent and remaining skill points with class and cross-class costs', () => {
+    service.addClass('rogue');
+
+    service.setSkillRank('open-lock', 4);
+    service.setSkillRank('hide', 2);
+    service.setSkillRank('listen', 1);
+
+    expect(service.spentSkillPoints()).toBe(8);
+    expect(service.remainingSkillPoints()).toBe(service.availableSkillPoints() - 8);
+  });
+
+  it('should compute maximum skill ranks', () => {
+    service.addClass('fighter');
+    service.setClassLevel('fighter', 2);
+
+    expect(service.maxClassSkillRanks()).toBe(5);
+    expect(service.maxCrossClassSkillRanks()).toBe(2);
+    expect(service.maxRanksFor('climb')).toBe(5);
+    expect(service.maxRanksFor('listen')).toBe(2);
+  });
+
+  it('should compute available feats count', () => {
+    expect(service.availableFeatsCount()).toBe(0);
+
+    service.addClass('fighter');
+    expect(service.availableFeatsCount()).toBe(2);
+
+    service.selectRace(RACES.find((race) => race.id === 'human')!);
+    expect(service.availableFeatsCount()).toBe(3);
+
+    service.setClassLevel('fighter', 3);
+    expect(service.availableFeatsCount()).toBe(4);
+  });
+
+  it('should compute total weight and load category', () => {
+    expect(service.totalWeight()).toBe(0);
+    expect(service.loadCategory()).toBe('Leggero');
+
+    const longsword = WEAPONS.find((weapon) => weapon.id === 'longsword')!;
+    service.toggleWeapon(longsword);
+    expect(service.totalWeight()).toBe(4);
+
+    const fullPlate = ARMOR.find((armor) => armor.id === 'full-plate')!;
+    service.toggleArmor(fullPlate);
+    expect(service.totalWeight()).toBe(54);
+  });
+
+  it('should include armor bonus and max DEX in armor class', () => {
+    service.setAbility('DEX', 14);
+    expect(service.armorClass()).toBe(12);
+
+    const fullPlate = ARMOR.find((armor) => armor.id === 'full-plate')!;
+    service.toggleArmor(fullPlate);
+    expect(service.armorClass()).toBe(19);
+  });
+
+  it('should compute skill totals with ability, size and armor modifiers', () => {
+    service.setAbility('STR', 14);
+    service.addClass('fighter');
+    service.setSkillRank('climb', 2);
+
+    const climb = service.totalSkills().find((total) => total.skill.id === 'climb');
+    expect(climb?.total).toBe(4);
+
+    const hideArmor = ARMOR.find((armor) => armor.id === 'hide')!;
+    service.toggleArmor(hideArmor);
+    expect(service.totalSkills().find((total) => total.skill.id === 'climb')?.total).toBe(1);
   });
 });

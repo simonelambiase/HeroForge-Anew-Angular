@@ -1,0 +1,76 @@
+<div class="skills-step">
+  <app-card-panel title="Abilità" [collapsible]="false">
+    <div class="skills-toolbar">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Cerca un'abilità..."
+        [value]="searchQuery()"
+        (input)="updateSearchQuery($event)"
+      />
+      <span class="points-badge" [class.negative]="service.remainingSkillPoints() < 0">
+        Punti rimanenti: {{ service.remainingSkillPoints() }}
+      </span>
+      <span class="limits">
+        Max classe: {{ service.maxClassSkillRanks() }} · Max cross: {{ service.maxCrossClassSkillRanks() }}
+      </span>
+    </div>
+
+    <div class="table-scroll">
+      <table class="skills-table">
+        <thead>
+          <tr>
+            <th>Abilità</th>
+            <th>Caratteristica</th>
+            <th>Tipo</th>
+            <th>Gradi</th>
+            <th>Totale</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (skill of filteredSkills(); track skill.id) {
+            <tr>
+              <td>
+                <span class="skill-name">{{ skill.name }}</span>
+                @if (!skill.untrained) {
+                  <span class="trained-only">Solo addestrata</span>
+                }
+              </td>
+              <td>
+                {{ abilityLabels[skill.keyAbility] }}
+                ({{ keyAbilityModifier(skill) }})
+              </td>
+              <td>
+                <span class="type-badge" [class.cross]="!isClassSkill(skill.id)">
+                  {{ isClassSkill(skill.id) ? 'Classe' : 'Cross' }}
+                </span>
+              </td>
+              <td>
+                <div class="rank-controls">
+                  <button
+                    type="button"
+                    class="rank-btn"
+                    [disabled]="!canDecrement(skill.id)"
+                    (click)="decrement(skill.id)"
+                  >
+                    −
+                  </button>
+                  <span class="rank-value">{{ rankFor(skill.id) }}</span>
+                  <button
+                    type="button"
+                    class="rank-btn"
+                    [disabled]="!canIncrement(skill.id)"
+                    (click)="increment(skill.id)"
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
+              <td class="total-cell">{{ totalFor(skill) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </app-card-panel>
+</div>

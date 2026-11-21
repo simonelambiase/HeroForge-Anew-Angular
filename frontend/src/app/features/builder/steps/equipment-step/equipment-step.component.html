@@ -1,0 +1,68 @@
+<div class="equipment-step">
+  <app-card-panel title="Equipaggiamento" [collapsible]="false">
+    <div class="equipment-summary">
+      <span class="summary-item">CA: <strong>{{ service.armorClass() }}</strong></span>
+      <span class="summary-item">Peso: <strong>{{ service.totalWeight() }}</strong></span>
+      <span class="summary-item">
+        Carico: <strong>{{ service.loadCategory() }}</strong>
+        ({{ service.carryingCapacity().light }} / {{ service.carryingCapacity().medium }} /
+        {{ service.carryingCapacity().heavy }})
+      </span>
+      <span class="summary-item">Penalità prova: <strong>{{ armorCheckPenalty() }}</strong></span>
+    </div>
+  </app-card-panel>
+
+  <app-card-panel title="Armi" [collapsible]="false">
+    <div class="filter-group" role="group" aria-label="Filtra armi">
+      @for (type of weaponFilters; track type) {
+        <button
+          type="button"
+          class="filter-btn"
+          [class.active]="weaponFilter() === type"
+          (click)="weaponFilter.set(type)"
+        >
+          {{ type === 'all' ? 'Tutte' : weaponCategoryLabels[type] }}
+        </button>
+      }
+    </div>
+
+    <div class="equipment-grid">
+      @for (weapon of filteredWeapons(); track weapon.id) {
+        <app-selector-card
+          [title]="weapon.name"
+          [description]="weaponDescription(weapon)"
+          [badges]="weaponBadges(weapon)"
+          [selected]="isWeaponEquipped(weapon.id)"
+          (selectedChange)="toggleWeapon(weapon)"
+        />
+      }
+    </div>
+  </app-card-panel>
+
+  <app-card-panel title="Armature e scudi" [collapsible]="false">
+    <div class="filter-group" role="group" aria-label="Filtra armature">
+      @for (type of armorFilters; track type) {
+        <button
+          type="button"
+          class="filter-btn"
+          [class.active]="armorFilter() === type"
+          (click)="armorFilter.set(type)"
+        >
+          {{ type === 'all' ? 'Tutte' : armorTypeLabels[type] }}
+        </button>
+      }
+    </div>
+
+    <div class="equipment-grid">
+      @for (armor of filteredArmors(); track armor.id) {
+        <app-selector-card
+          [title]="armor.name"
+          [description]="armorDescription(armor)"
+          [badges]="armorBadges(armor)"
+          [selected]="isArmorEquipped(armor.id)"
+          (selectedChange)="toggleArmor(armor)"
+        />
+      }
+    </div>
+  </app-card-panel>
+</div>

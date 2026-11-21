@@ -57,6 +57,10 @@ export class SheetPreviewComponent {
       baseAbilities: { ...this.service.abilities() },
       race: this.service.selectedRace(),
       classLevels: [...this.service.classLevels()],
+      skillRanks: { ...this.service.skillRanks() },
+      selectedFeats: [...this.service.selectedFeats()],
+      equippedWeapons: [...this.service.equippedWeapons()],
+      equippedArmor: this.service.equippedArmor(),
     };
   }
 

@@ -16,6 +16,13 @@ import {
   type CharacterClass,
 } from '../models/class.model';
 import type { ClassLevel } from '../models/character.model';
+import { SKILLS, skillSizeModifier, type SkillTotal } from '../models/skill.model';
+import {
+  carryingCapacityForStrength,
+  type Armor,
+  type CarryingCapacity,
+  type Weapon,
+} from '../models/equipment.model';
 
 export interface SavingThrows {
   fortitude: number;
@@ -29,11 +36,19 @@ export class CharacterService {
   private readonly _abilities = signal<Record<AbilityName, number>>({ ...DEFAULT_ABILITIES });
   private readonly _selectedRace = signal<Race | null>(null);
   private readonly _classLevels = signal<ClassLevel[]>([]);
+  private readonly _skillRanks = signal<Record<string, number>>({});
+  private readonly _selectedFeats = signal<string[]>([]);
+  private readonly _equippedWeapons = signal<Weapon[]>([]);
+  private readonly _equippedArmor = signal<Armor | null>(null);
 
   readonly characterName = this._characterName.asReadonly();
   readonly abilities = this._abilities.asReadonly();
   readonly selectedRace = this._selectedRace.asReadonly();
   readonly classLevels = this._classLevels.asReadonly();
+  readonly skillRanks = this._skillRanks.asReadonly();
+  readonly selectedFeats = this._selectedFeats.asReadonly();
+  readonly equippedWeapons = this._equippedWeapons.asReadonly();
+  readonly equippedArmor = this._equippedArmor.asReadonly();
 
   readonly finalAbilities = computed<Record<AbilityName, AbilityScore>>(() => {
     const base = this._abilities();
@@ -104,7 +119,138 @@ export class CharacterService {
   readonly armorClass = computed(() => {
     const dexterityModifier = this.abilityModifiers().DEX.modifier;
     const size = this._selectedRace()?.size ?? 'Medium';
-    return 10 + dexterityModifier + SIZE_AC_MODIFIERS[size];
+    const armor = this._equippedArmor();
+    const maxDexBonus = armor?.maxDexBonus ?? null;
+    const effectiveDexterity =
+      maxDexBonus === null ? dexterityModifier : Math.min(dexterityModifier, maxDexBonus);
+
+    return 10 + effectiveDexterity + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0);
+  });
+
+  readonly maxClassSkillRanks = computed(() => this.totalLevel() + 3);
+
+  readonly maxCrossClassSkillRanks = computed(() => Math.floor((this.totalLevel() + 3) / 2));
+
+  readonly availableSkillPoints = computed(() => {
+    const totalLevel = this.totalLevel();
+    if (totalLevel <= 0) {
+      return 0;
+    }
+
+    const intelligenceModifier = Math.max(1, this.abilityModifiers().INT.modifier);
+    const isHuman = this._selectedRace()?.id === 'human';
+
+    let points = 0;
+    let firstClassLevelProcessed = false;
+
+    for (const classLevel of this._classLevels()) {
+      const characterClass = this.findClass(classLevel.classId);
+      if (!characterClass) {
+        continue;
+      }
+
+      const perLevel = characterClass.skillPointsPerLevel + intelligenceModifier;
+
+      for (let i = 0; i < classLevel.level; i++) {
+        if (!firstClassLevelProcessed) {
+          points += perLevel * 4 + (isHuman ? 4 : 0);
+          firstClassLevelProcessed = true;
+        } else {
+          points += perLevel + (isHuman ? 1 : 0);
+        }
+      }
+    }
+
+    return points;
+  });
+
+  readonly spentSkillPoints = computed(() => {
+    let spent = 0;
+
+    for (const [skillId, ranks] of Object.entries(this._skillRanks())) {
+      spent += ranks * (this.isClassSkill(skillId) ? 1 : 2);
+    }
+
+    return spent;
+  });
+
+  readonly remainingSkillPoints = computed(
+    () => this.availableSkillPoints() - this.spentSkillPoints(),
+  );
+
+  readonly availableFeatsCount = computed(() => {
+    const totalLevel = this.totalLevel();
+    if (totalLevel <= 0) {
+      return 0;
+    }
+
+    let count = 1;
+    for (const level of [3, 6, 9, 12, 15, 18]) {
+      if (totalLevel >= level) {
+        count += 1;
+      }
+    }
+
+    if (this._selectedRace()?.id === 'human') {
+      count += 1;
+    }
+
+    if (this._classLevels().some((classLevel) => classLevel.classId === 'fighter')) {
+      count += 1;
+    }
+
+    return count;
+  });
+
+  readonly totalWeight = computed(() => {
+    const weaponsWeight = this._equippedWeapons().reduce((sum, weapon) => sum + weapon.weight, 0);
+    const armorWeight = this._equippedArmor()?.weight ?? 0;
+    return weaponsWeight + armorWeight;
+  });
+
+  readonly carryingCapacity = computed<CarryingCapacity>(() =>
+    carryingCapacityForStrength(this.finalAbilities().STR.total),
+  );
+
+  readonly loadCategory = computed(() => {
+    const weight = this.totalWeight();
+    const capacity = this.carryingCapacity();
+
+    if (weight <= capacity.light) {
+      return 'Leggero';
+    }
+    if (weight <= capacity.medium) {
+      return 'Medio';
+    }
+    if (weight <= capacity.heavy) {
+      return 'Pesante';
+    }
+    return 'Oltre il massimo';
+  });
+
+  readonly totalSkills = computed<SkillTotal[]>(() => {
+    const ranks = this._skillRanks();
+    const modifiers = this.abilityModifiers();
+    const size = this._selectedRace()?.size ?? 'Medium';
+    const armor = this._equippedArmor();
+
+    return SKILLS.map((skill) => {
+      const rankCount = ranks[skill.id] ?? 0;
+      const isClassSkill = this.isClassSkill(skill.id);
+      const keyAbilityModifier = modifiers[skill.keyAbility].modifier;
+      const sizeModifier = skillSizeModifier(skill.id, size);
+      const armorPenalty = skill.armorCheckPenalty ? (armor?.armorCheckPenalty ?? 0) : 0;
+
+      return {
+        skill,
+        ranks: rankCount,
+        isClassSkill,
+        keyAbilityModifier,
+        sizeModifier,
+        armorPenalty,
+        total: rankCount + keyAbilityModifier + sizeModifier + armorPenalty,
+      };
+    });
   });
 
   readonly totalHitPoints = computed(() => {
@@ -166,6 +312,61 @@ export class CharacterService {
     this._classLevels.update((levels) =>
       levels.filter((classLevel) => classLevel.classId !== classId),
     );
+  }
+
+  setSkillRank(skillId: string, ranks: number): void {
+    if (ranks <= 0) {
+      this._skillRanks.update((current) => {
+        const next = { ...current };
+        delete next[skillId];
+        return next;
+      });
+      return;
+    }
+
+    this._skillRanks.update((current) => ({ ...current, [skillId]: ranks }));
+  }
+
+  toggleFeat(featId: string): void {
+    this._selectedFeats.update((current) =>
+      current.includes(featId)
+        ? current.filter((id) => id !== featId)
+        : [...current, featId],
+    );
+  }
+
+  toggleWeapon(weapon: Weapon): void {
+    this._equippedWeapons.update((current) =>
+      current.some((equipped) => equipped.id === weapon.id)
+        ? current.filter((equipped) => equipped.id !== weapon.id)
+        : [...current, weapon],
+    );
+  }
+
+  setEquippedArmor(armor: Armor | null): void {
+    this._equippedArmor.set(armor);
+  }
+
+  toggleArmor(armor: Armor): void {
+    this._equippedArmor.update((current) => (current?.id === armor.id ? null : armor));
+  }
+
+  isClassSkill(skillId: string): boolean {
+    const skill = SKILLS.find((candidate) => candidate.id === skillId);
+    if (!skill) {
+      return false;
+    }
+
+    return this._classLevels().some((classLevel) => {
+      const characterClass = this.findClass(classLevel.classId);
+      return characterClass?.classSkills.includes(skill.name) ?? false;
+    });
+  }
+
+  maxRanksFor(skillId: string): number {
+    return this.isClassSkill(skillId)
+      ? this.maxClassSkillRanks()
+      : this.maxCrossClassSkillRanks();
   }
 
   private findClass(classId: string): CharacterClass | undefined {

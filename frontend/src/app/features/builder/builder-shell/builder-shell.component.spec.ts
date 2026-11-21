@@ -20,7 +20,7 @@ describe('BuilderShellComponent', () => {
 
     const element = fixture.nativeElement as HTMLElement;
     expect(element.textContent).toContain('Hakrom');
-    expect(element.querySelectorAll('.stepper-step').length).toBe(4);
+    expect(element.querySelectorAll('.stepper-step').length).toBe(7);
   });
 
   it('should navigate between steps', () => {

@@ -8,6 +8,9 @@ import { AiAssistantPanelComponent } from '../../ai-advisor/components/ai-assist
 import { AbilitiesStepComponent } from '../steps/abilities-step/abilities-step.component';
 import { RaceStepComponent } from '../steps/race-step/race-step.component';
 import { ClassStepComponent } from '../steps/class-step/class-step.component';
+import { SkillsStepComponent } from '../steps/skills-step/skills-step.component';
+import { FeatsStepComponent } from '../steps/feats-step/feats-step.component';
+import { EquipmentStepComponent } from '../steps/equipment-step/equipment-step.component';
 import { SheetPreviewComponent } from '../steps/sheet-preview/sheet-preview.component';
 
 @Component({
@@ -20,6 +23,9 @@ import { SheetPreviewComponent } from '../steps/sheet-preview/sheet-preview.comp
     AbilitiesStepComponent,
     RaceStepComponent,
     ClassStepComponent,
+    SkillsStepComponent,
+    FeatsStepComponent,
+    EquipmentStepComponent,
     SheetPreviewComponent,
   ],
   templateUrl: './builder-shell.component.html',
@@ -29,7 +35,15 @@ import { SheetPreviewComponent } from '../steps/sheet-preview/sheet-preview.comp
 export class BuilderShellComponent {
   readonly service = inject(CharacterService);
   readonly aiService = inject(OpenRouterService);
-  readonly stepLabels = ['Abilità', 'Razza', 'Classe', 'Scheda'];
+  readonly stepLabels = [
+    'Caratteristiche',
+    'Razza',
+    'Classe',
+    'Abilità',
+    'Talenti',
+    'Equipaggiamento',
+    'Scheda Finale',
+  ];
   readonly currentStep = signal<number>(0);
   readonly aiPanelOpen = signal<boolean>(false);
 
