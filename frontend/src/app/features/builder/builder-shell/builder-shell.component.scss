@@ -1,0 +1,53 @@
+.builder-shell {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.builder-header h1 {
+  font-size: 2rem;
+  color: var(--color-accent-soft);
+}
+
+.builder-header p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.builder-content {
+  min-height: 12rem;
+}
+
+.builder-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.nav-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.nav-btn.primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

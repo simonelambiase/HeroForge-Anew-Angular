@@ -1,0 +1,42 @@
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.stepper-index {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.stepper-step.active {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.stepper-step.active .stepper-index {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.stepper-step.done .stepper-index {
+  background: var(--color-positive);
+  color: var(--color-bg);
+}

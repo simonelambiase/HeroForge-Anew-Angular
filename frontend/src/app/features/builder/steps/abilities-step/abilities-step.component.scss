@@ -1,0 +1,59 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.method-switch {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.method-btn,
+.budget-btn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+}
+
+.method-btn.active,
+.budget-btn.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.budget-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.budget-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.budget-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.remaining {
+  font-weight: 700;
+}
+
+.remaining.negative {
+  color: var(--color-negative);
+}
+
+.abilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.75rem;
+}

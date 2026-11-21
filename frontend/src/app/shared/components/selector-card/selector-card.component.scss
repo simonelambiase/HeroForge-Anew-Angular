@@ -1,0 +1,51 @@
+.selector-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+  padding: 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.selector-card:hover:not(.disabled) {
+  border-color: var(--color-accent);
+}
+
+.selector-card.selected {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+}
+
+.selector-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selector-title {
+  font-weight: 700;
+}
+
+.selector-description {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.selector-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.selector-badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+}

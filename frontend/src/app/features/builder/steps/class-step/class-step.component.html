@@ -1,0 +1,35 @@
+<div class="class-step">
+  <app-card-panel title="Scegli le classi" [collapsible]="false">
+    <div class="class-grid">
+      @for (characterClass of classes; track characterClass.id) {
+        <app-selector-card
+          [title]="characterClass.name"
+          [description]="classDescription(characterClass)"
+          [badges]="saveBadges(characterClass)"
+          [selected]="isSelected(characterClass.id)"
+          (selectedChange)="addClass(characterClass.id)"
+        />
+      }
+    </div>
+  </app-card-panel>
+
+  <app-card-panel title="Livelli assegnati" [collapsible]="false">
+    @if (service.classLevels().length === 0) {
+      <p class="empty">Nessuna classe selezionata.</p>
+    } @else {
+      <ul class="level-list">
+        @for (classLevel of service.classLevels(); track classLevel.classId) {
+          <li class="level-row">
+            <span class="level-name">{{ className(classLevel.classId) }}</span>
+            <span class="level-count">Livello {{ classLevel.level }}</span>
+            <div class="level-actions">
+              <button type="button" (click)="decrementLevel(classLevel.classId)">−</button>
+              <button type="button" (click)="incrementLevel(classLevel.classId)">+</button>
+              <button type="button" (click)="removeClass(classLevel.classId)">Rimuovi</button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </app-card-panel>
+</div>

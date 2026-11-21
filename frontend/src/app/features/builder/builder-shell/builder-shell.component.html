@@ -1,0 +1,48 @@
+<div class="builder-shell">
+  <header class="builder-header">
+    <h1>Hakrom</h1>
+    <p>Creatore Personaggio D&amp;D 3.5</p>
+  </header>
+
+  <app-step-stepper [steps]="stepLabels" [(currentStep)]="currentStep" />
+
+  <section class="preview-bar" aria-label="Anteprima rapida">
+    <app-badge-indicator label="BAB" [value]="bab()" variant="bab" />
+    <app-badge-indicator label="CA" [value]="armorClass()" variant="ac" />
+    <app-badge-indicator label="Tempra" [value]="fortitude()" variant="save" />
+    <app-badge-indicator label="Riflessi" [value]="reflex()" variant="save" />
+    <app-badge-indicator label="Volontà" [value]="will()" variant="save" />
+    <app-badge-indicator label="PF" [value]="hitPoints()" variant="hp" />
+  </section>
+
+  <main class="builder-content">
+    @switch (currentStep()) {
+      @case (0) {
+        <app-abilities-step />
+      }
+      @case (1) {
+        <app-race-step />
+      }
+      @case (2) {
+        <app-class-step />
+      }
+      @case (3) {
+        <app-sheet-preview />
+      }
+    }
+  </main>
+
+  <footer class="builder-footer">
+    <button type="button" class="nav-btn" [disabled]="currentStep() === 0" (click)="previous()">
+      Indietro
+    </button>
+    <button
+      type="button"
+      class="nav-btn primary"
+      [disabled]="currentStep() === stepLabels.length - 1"
+      (click)="next()"
+    >
+      Avanti
+    </button>
+  </footer>
+</div>

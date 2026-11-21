@@ -1,0 +1,22 @@
+<button
+  type="button"
+  class="selector-card"
+  [class.selected]="selected()"
+  [class.disabled]="disabled()"
+  [disabled]="disabled()"
+  (click)="select()"
+>
+  <span class="selector-title">{{ title() }}</span>
+
+  @if (description()) {
+    <span class="selector-description">{{ description() }}</span>
+  }
+
+  @if (badges().length) {
+    <span class="selector-badges">
+      @for (badge of badges(); track badge) {
+        <span class="selector-badge">{{ badge }}</span>
+      }
+    </span>
+  }
+</button>

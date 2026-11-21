@@ -1,0 +1,67 @@
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.6rem 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.stat-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.stat-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stat-score {
+  font-size: 1.4rem;
+  font-weight: 700;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.modifier-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-positive);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+}
+
+.modifier-badge.negative {
+  color: var(--color-negative);
+}
+
+.racial-bonus {
+  font-size: 0.72rem;
+  color: var(--color-positive);
+}
+
+.racial-bonus.negative {
+  color: var(--color-negative);
+}

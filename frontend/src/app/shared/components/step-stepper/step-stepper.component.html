@@ -1,0 +1,14 @@
+<nav class="stepper" aria-label="Passi del wizard">
+  @for (step of steps(); track step; let i = $index) {
+    <button
+      type="button"
+      class="stepper-step"
+      [class.active]="currentStep() === i"
+      [class.done]="i < currentStep()"
+      (click)="goTo(i)"
+    >
+      <span class="stepper-index">{{ i + 1 }}</span>
+      <span class="stepper-label">{{ step }}</span>
+    </button>
+  }
+</nav>

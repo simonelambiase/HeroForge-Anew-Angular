@@ -1,0 +1,24 @@
+<section class="card-panel" [class.is-collapsed]="collapsed()">
+  <header class="card-header">
+    <h2 class="card-title">{{ title() }}</h2>
+    @if (collapsible()) {
+      <button
+        type="button"
+        class="collapse-btn"
+        (click)="toggle()"
+        [attr.aria-expanded]="!collapsed()"
+      >
+        {{ collapsed() ? 'Espandi' : 'Riduci' }}
+      </button>
+    }
+  </header>
+
+  @if (!collapsed()) {
+    <div class="card-actions">
+      <ng-content select="[card-actions]"></ng-content>
+    </div>
+    <div class="card-body">
+      <ng-content></ng-content>
+    </div>
+  }
+</section>

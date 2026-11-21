@@ -1,0 +1,59 @@
+<app-card-panel title="Punteggi di caratteristica" [collapsible]="false">
+  <div class="controls">
+    <div class="method-switch" role="group" aria-label="Metodo di generazione">
+      <button
+        type="button"
+        class="method-btn"
+        [class.active]="method() === 'pointBuy'"
+        (click)="setMethod('pointBuy')"
+      >
+        Point Buy
+      </button>
+      <button
+        type="button"
+        class="method-btn"
+        [class.active]="method() === 'manual'"
+        (click)="setMethod('manual')"
+      >
+        Manuale
+      </button>
+    </div>
+
+    @if (method() === 'pointBuy') {
+      <div class="budget-row">
+        <span class="budget-label">Budget punti</span>
+        <div class="budget-presets">
+          @for (preset of pointBuyPresets; track preset) {
+            <button
+              type="button"
+              class="budget-btn"
+              [class.active]="budget() === preset"
+              (click)="setBudget(preset)"
+            >
+              {{ preset }}
+            </button>
+          }
+        </div>
+        <span class="remaining" [class.negative]="remainingPoints() < 0">
+          Punti rimanenti: {{ remainingPoints() }}
+        </span>
+      </div>
+    }
+  </div>
+
+  <div class="abilities-grid">
+    @for (ability of abilityOrder; track ability) {
+      <app-stat-box
+        [name]="ability"
+        [label]="abilityLabels[ability]"
+        [score]="service.abilities()[ability]"
+        (scoreChange)="setAbility(ability, $event)"
+        [racialBonus]="racialBonusFor(ability)"
+        [min]="minScore()"
+        [max]="maxScore"
+        [canIncrement]="canIncrement(ability)"
+        [canDecrement]="canDecrement(ability)"
+      />
+    }
+  </div>
+</app-card-panel>

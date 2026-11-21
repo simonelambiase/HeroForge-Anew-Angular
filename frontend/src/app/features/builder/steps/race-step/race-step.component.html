@@ -1,0 +1,25 @@
+<div class="race-step">
+  <app-card-panel title="Scegli la razza" [collapsible]="false">
+    <div class="race-grid">
+      @for (race of races; track race.id) {
+        <app-selector-card
+          [title]="race.name"
+          [description]="raceDescription(race)"
+          [badges]="abilityModifierBadges(race)"
+          [selected]="isSelected(race.id)"
+          (selectedChange)="selectRace(race)"
+        />
+      }
+    </div>
+  </app-card-panel>
+
+  @if (service.selectedRace(); as race) {
+    <app-card-panel title="Tratti razziali — {{ race.name }}" [collapsible]="false">
+      <ul class="trait-list">
+        @for (trait of race.racialTraits; track trait) {
+          <li>{{ trait }}</li>
+        }
+      </ul>
+    </app-card-panel>
+  }
+</div>

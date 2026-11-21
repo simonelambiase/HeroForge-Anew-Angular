@@ -1,0 +1,82 @@
+<div class="sheet-preview">
+  <header class="sheet-header">
+    <input
+      type="text"
+      class="name-input"
+      placeholder="Nome del personaggio"
+      [value]="service.characterName()"
+      (input)="updateName($event)"
+    />
+    <div class="sheet-actions">
+      <button type="button" (click)="print()">Stampa</button>
+      <button type="button" (click)="exportJson()">Esporta JSON</button>
+    </div>
+  </header>
+
+  <section class="summary-bar">
+    <app-badge-indicator label="BAB" [value]="babLabel()" variant="bab" />
+    <app-badge-indicator label="CA" [value]="armorClass()" variant="ac" />
+    <app-badge-indicator label="Tempra" [value]="fortitude()" variant="save" />
+    <app-badge-indicator label="Riflessi" [value]="reflex()" variant="save" />
+    <app-badge-indicator label="Volontà" [value]="will()" variant="save" />
+    <app-badge-indicator label="PF" [value]="hitPoints()" variant="hp" />
+  </section>
+
+  <section class="sheet-section">
+    <h2>Caratteristiche</h2>
+    <table class="ability-table">
+      <thead>
+        <tr>
+          <th>Caratteristica</th>
+          <th>Punteggio</th>
+          <th>Modificatore</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ability of abilityOrder; track ability) {
+          <tr>
+            <td>{{ abilityLabels[ability] }}</td>
+            <td>{{ service.finalAbilities()[ability].total }}</td>
+            <td>{{ modifierLabel(ability) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="sheet-section">
+    <h2>Razza</h2>
+    <p>{{ service.selectedRace()?.name ?? 'Nessuna razza selezionata' }}</p>
+  </section>
+
+  <section class="sheet-section">
+    <h2>Classi e livelli</h2>
+    @if (service.classLevels().length === 0) {
+      <p>Nessuna classe selezionata.</p>
+    } @else {
+      <ul class="class-list">
+        @for (classLevel of service.classLevels(); track classLevel.classId) {
+          <li>{{ className(classLevel.classId) }} — Livello {{ classLevel.level }}</li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="sheet-section">
+    <h2>Tiri salvezza</h2>
+    <ul class="save-list">
+      <li>
+        Tempra: {{ baseSaveLabel(service.baseSavingThrows().fortitude) }} (base) +
+        {{ modifierLabel('CON') }} (COS) = <strong>{{ fortitude() }}</strong>
+      </li>
+      <li>
+        Riflessi: {{ baseSaveLabel(service.baseSavingThrows().reflex) }} (base) +
+        {{ modifierLabel('DEX') }} (DES) = <strong>{{ reflex() }}</strong>
+      </li>
+      <li>
+        Volontà: {{ baseSaveLabel(service.baseSavingThrows().will) }} (base) +
+        {{ modifierLabel('WIS') }} (SAG) = <strong>{{ will() }}</strong>
+      </li>
+    </ul>
+  </section>
+</div>

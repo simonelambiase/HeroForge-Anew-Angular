@@ -1,0 +1,33 @@
+<div class="stat-box" [attr.data-ability]="name()">
+  <span class="stat-label">{{ label() }}</span>
+
+  <div class="stat-value-row">
+    <button
+      type="button"
+      class="stat-btn"
+      [disabled]="!canDecrement()"
+      (click)="decrement()"
+      [attr.aria-label]="'Diminuisci ' + label()"
+    >
+      −
+    </button>
+    <span class="stat-score">{{ total() }}</span>
+    <button
+      type="button"
+      class="stat-btn"
+      [disabled]="!canIncrement()"
+      (click)="increment()"
+      [attr.aria-label]="'Aumenta ' + label()"
+    >
+      +
+    </button>
+  </div>
+
+  <span class="modifier-badge" [class.negative]="modifier() < 0">{{ modifierLabel() }}</span>
+
+  @if (racialBonus() !== 0) {
+    <span class="racial-bonus" [class.negative]="racialBonus() < 0">
+      Razza {{ racialBonusLabel() }}
+    </span>
+  }
+</div>
