@@ -19,7 +19,7 @@ describe('BuilderShellComponent', () => {
     fixture.detectChanges();
 
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.textContent).toContain('Hakrom');
+    expect(element.textContent).toContain('HeroForge Anew Angular');
     expect(element.querySelectorAll('.stepper-step').length).toBe(7);
   });
 

@@ -125,7 +125,7 @@ export class SheetPreviewComponent {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = 'hakrom-character.json';
+    anchor.download = 'heroforge-anew-angular-character.json';
     anchor.click();
     URL.revokeObjectURL(url);
   }

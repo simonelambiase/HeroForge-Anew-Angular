@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for Hakrom Angular SPA
+# Multi-stage Dockerfile for HeroForge Anew Angular SPA
 FROM node:22-alpine AS builder
 
 WORKDIR /app

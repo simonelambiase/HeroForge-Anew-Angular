@@ -43,7 +43,7 @@ describe('OpenRouterService', () => {
     service.setApiKey('  test-key  ');
     expect(service.apiKey()).toBe('test-key');
     expect(service.isConfigured()).toBe(true);
-    expect(window.localStorage.getItem('hakrom_openrouter_api_key')).toBe('test-key');
+    expect(window.localStorage.getItem('heroforge-anew-angular_openrouter_api_key')).toBe('test-key');
   });
 
   it('should clear the api key', () => {
@@ -51,13 +51,13 @@ describe('OpenRouterService', () => {
     service.clearApiKey();
     expect(service.apiKey()).toBe('');
     expect(service.isConfigured()).toBe(false);
-    expect(window.localStorage.getItem('hakrom_openrouter_api_key')).toBeNull();
+    expect(window.localStorage.getItem('heroforge-anew-angular_openrouter_api_key')).toBeNull();
   });
 
   it('should set and persist the selected model', () => {
     service.setSelectedModel('openai/gpt-4o-mini');
     expect(service.selectedModel().id).toBe('openai/gpt-4o-mini');
-    expect(window.localStorage.getItem('hakrom_openrouter_model')).toBe('openai/gpt-4o-mini');
+    expect(window.localStorage.getItem('heroforge-anew-angular_openrouter_model')).toBe('openai/gpt-4o-mini');
   });
 
   it('should fall back to the default model for an unknown id', () => {
@@ -66,8 +66,8 @@ describe('OpenRouterService', () => {
   });
 
   it('should restore persisted config on construction', () => {
-    window.localStorage.setItem('hakrom_openrouter_api_key', 'persisted-key');
-    window.localStorage.setItem('hakrom_openrouter_model', 'meta-llama/llama-3.3-70b-instruct');
+    window.localStorage.setItem('heroforge-anew-angular_openrouter_api_key', 'persisted-key');
+    window.localStorage.setItem('heroforge-anew-angular_openrouter_model', 'meta-llama/llama-3.3-70b-instruct');
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({});
@@ -97,8 +97,8 @@ describe('OpenRouterService', () => {
     expect(url).toBe('https://openrouter.ai/api/v1/chat/completions');
     expect(init.method).toBe('POST');
     expect(init.headers['Authorization']).toBe('Bearer test-key');
-    expect(init.headers['HTTP-Referer']).toBe('https://hakrom.simonelambiase.it');
-    expect(init.headers['X-Title']).toBe('Hakrom D&D 3.5 Builder');
+    expect(init.headers['HTTP-Referer']).toBe('https://github.com/simonelambiase/HeroForge-Anew-Angular');
+    expect(init.headers['X-Title']).toBe('HeroForge Anew Angular D&D 3.5 Builder');
     expect(JSON.parse(init.body).model).toBe('openai/gpt-4o-mini');
   });
 

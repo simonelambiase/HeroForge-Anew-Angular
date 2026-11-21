@@ -5,7 +5,7 @@ export type SupportedLanguage = 'it' | 'en';
 export const SUPPORTED_LANGUAGES: readonly SupportedLanguage[] = ['it', 'en'];
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'it';
 
-const LANGUAGE_STORAGE_KEY = 'hakrom.language';
+const LANGUAGE_STORAGE_KEY = 'heroforge-anew-angular.language';
 
 interface LanguageOption {
   code: SupportedLanguage;
@@ -19,7 +19,7 @@ interface Dictionary {
 
 const IT_DICTIONARY: Dictionary = {
   shell: {
-    title: 'Hakrom',
+    title: 'HeroForge Anew Angular',
     subtitle: 'Creatore Personaggio D&D 3.5',
     aiAssistant: 'AI Assistant',
     configure: 'Configura',
@@ -223,7 +223,7 @@ const IT_DICTIONARY: Dictionary = {
 
 const EN_DICTIONARY: Dictionary = {
   shell: {
-    title: 'Hakrom',
+    title: 'HeroForge Anew Angular',
     subtitle: 'D&D 3.5 Character Builder',
     aiAssistant: 'AI Assistant',
     configure: 'Configure',

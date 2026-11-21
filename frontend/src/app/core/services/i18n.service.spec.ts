@@ -17,7 +17,7 @@ describe('I18nService', () => {
   });
 
   it('should resolve a nested italian key', () => {
-    expect(service.t('shell.title')).toBe('Hakrom');
+    expect(service.t('shell.title')).toBe('HeroForge Anew Angular');
     expect(service.t('stepper.abilities')).toBe('Caratteristiche');
     expect(service.t('badges.ac')).toBe('CA');
   });
@@ -33,14 +33,14 @@ describe('I18nService', () => {
 
   it('should persist the selected language to localStorage', () => {
     service.setLanguage('en');
-    expect(window.localStorage.getItem('hakrom.language')).toBe('en');
+    expect(window.localStorage.getItem('heroforge-anew-angular.language')).toBe('en');
 
     service.setLanguage('it');
-    expect(window.localStorage.getItem('hakrom.language')).toBe('it');
+    expect(window.localStorage.getItem('heroforge-anew-angular.language')).toBe('it');
   });
 
   it('should restore the language from localStorage on creation', () => {
-    window.localStorage.setItem('hakrom.language', 'en');
+    window.localStorage.setItem('heroforge-anew-angular.language', 'en');
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({});

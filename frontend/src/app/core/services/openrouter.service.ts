@@ -7,8 +7,8 @@ import {
   type OpenRouterModel,
 } from '../models/openrouter.model';
 
-const API_KEY_STORAGE_KEY = 'hakrom_openrouter_api_key';
-const MODEL_STORAGE_KEY = 'hakrom_openrouter_model';
+const API_KEY_STORAGE_KEY = 'heroforge-anew-angular_openrouter_api_key';
+const MODEL_STORAGE_KEY = 'heroforge-anew-angular_openrouter_model';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 interface OpenRouterMessage {
@@ -119,8 +119,8 @@ export class OpenRouterService {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
-          'HTTP-Referer': 'https://hakrom.simonelambiase.it',
-          'X-Title': 'Hakrom D&D 3.5 Builder',
+          'HTTP-Referer': 'https://github.com/simonelambiase/HeroForge-Anew-Angular',
+          'X-Title': 'HeroForge Anew Angular D&D 3.5 Builder',
         },
         body: JSON.stringify({
           model: this._selectedModel().id,
