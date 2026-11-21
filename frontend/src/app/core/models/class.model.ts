@@ -151,3 +151,8 @@ export function calculateBabForLevel(level: number, progression: BabProgression)
 export function calculateBaseSave(level: number, progression: SaveProgression): number {
   return progression === 'good' ? 2 + Math.floor(level / 2) : Math.floor(level / 3);
 }
+
+/** Esperienza cumulativa D&D 3.5 necessaria per raggiungere il livello indicato. */
+export function calculateExperienceForLevel(level: number): number {
+  return ((level * (level - 1)) / 2) * 1000;
+}

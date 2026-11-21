@@ -17,7 +17,45 @@ export interface SkillTotal {
   keyAbilityModifier: number;
   sizeModifier: number;
   armorPenalty: number;
+  synergyBonus: number;
   total: number;
+}
+
+export interface SynergyRule {
+  source: string;
+  target: string;
+}
+
+/** Sinergie D&D 3.5: 5+ gradi nella sorgente conferiscono +2 alla destinazione. */
+export const SYNERGY_RULES: readonly SynergyRule[] = [
+  { source: 'tumble', target: 'balance' },
+  { source: 'tumble', target: 'jump' },
+  { source: 'bluff', target: 'diplomacy' },
+  { source: 'bluff', target: 'disguise' },
+  { source: 'bluff', target: 'intimidate' },
+  { source: 'bluff', target: 'sleight-of-hand' },
+  { source: 'sense-motive', target: 'diplomacy' },
+  { source: 'knowledge-nobility', target: 'diplomacy' },
+  { source: 'knowledge-local', target: 'gather-information' },
+  { source: 'jump', target: 'tumble' },
+  { source: 'handle-animal', target: 'ride' },
+  { source: 'survival', target: 'knowledge-nature' },
+  { source: 'concentration', target: 'autohypnosis' },
+];
+
+export function skillSynergyBonus(
+  skillId: string,
+  ranks: Readonly<Record<string, number>>,
+): number {
+  let bonus = 0;
+
+  for (const rule of SYNERGY_RULES) {
+    if (rule.target === skillId && (ranks[rule.source] ?? 0) >= 5) {
+      bonus += 2;
+    }
+  }
+
+  return bonus;
 }
 
 const HIDE_SIZE_MODIFIERS: Readonly<Record<SizeCategory, number>> = {

@@ -16,7 +16,7 @@ import {
   type CharacterClass,
 } from '../models/class.model';
 import type { ClassLevel } from '../models/character.model';
-import { SKILLS, skillSizeModifier, type SkillTotal } from '../models/skill.model';
+import { SKILLS, skillSizeModifier, skillSynergyBonus, type SkillTotal } from '../models/skill.model';
 import {
   carryingCapacityForStrength,
   type Armor,
@@ -86,6 +86,23 @@ export class CharacterService {
 
   readonly baseAttackBonus = computed(() => this.calculateBab(this._classLevels()));
 
+  readonly iterativeAttacks = computed(() => {
+    const bab = this.baseAttackBonus();
+    const attacks: number[] = [];
+    let attack = bab;
+
+    while (attack >= 1) {
+      attacks.push(attack);
+      attack -= 5;
+    }
+
+    if (attacks.length === 0) {
+      attacks.push(bab);
+    }
+
+    return attacks.map((value) => (value >= 0 ? `+${value}` : `${value}`)).join('/');
+  });
+
   readonly baseSavingThrows = computed<SavingThrows>(() => {
     let fortitude = 0;
     let reflex = 0;
@@ -126,6 +143,37 @@ export class CharacterService {
 
     return 10 + effectiveDexterity + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0);
   });
+
+  readonly touchArmorClass = computed(() => {
+    const dexterityModifier = this.abilityModifiers().DEX.modifier;
+    const size = this._selectedRace()?.size ?? 'Medium';
+    const armor = this._equippedArmor();
+    const maxDexBonus = armor?.maxDexBonus ?? null;
+    const effectiveDexterity =
+      maxDexBonus === null ? dexterityModifier : Math.min(dexterityModifier, maxDexBonus);
+
+    return 10 + effectiveDexterity + SIZE_AC_MODIFIERS[size];
+  });
+
+  readonly flatFootedArmorClass = computed(() => {
+    const dexterityModifier = this.abilityModifiers().DEX.modifier;
+    const size = this._selectedRace()?.size ?? 'Medium';
+    const armor = this._equippedArmor();
+
+    return 10 + SIZE_AC_MODIFIERS[size] + (armor?.armorBonus ?? 0) + Math.min(0, dexterityModifier);
+  });
+
+  readonly defensiveFightingBonus = computed<{ fightingDefensively: number; totalDefense: number }>(
+    () => {
+      const tumbleRanks = this._skillRanks()['tumble'] ?? 0;
+      const hasImprovedTumble = tumbleRanks >= 5;
+
+      return {
+        fightingDefensively: hasImprovedTumble ? 3 : 2,
+        totalDefense: hasImprovedTumble ? 6 : 4,
+      };
+    },
+  );
 
   readonly maxClassSkillRanks = computed(() => this.totalLevel() + 3);
 
@@ -240,6 +288,7 @@ export class CharacterService {
       const keyAbilityModifier = modifiers[skill.keyAbility].modifier;
       const sizeModifier = skillSizeModifier(skill.id, size);
       const armorPenalty = skill.armorCheckPenalty ? (armor?.armorCheckPenalty ?? 0) : 0;
+      const synergyBonus = skillSynergyBonus(skill.id, ranks);
 
       return {
         skill,
@@ -248,7 +297,8 @@ export class CharacterService {
         keyAbilityModifier,
         sizeModifier,
         armorPenalty,
-        total: rankCount + keyAbilityModifier + sizeModifier + armorPenalty,
+        synergyBonus,
+        total: rankCount + keyAbilityModifier + sizeModifier + armorPenalty + synergyBonus,
       };
     });
   });
