@@ -1,0 +1,111 @@
+@if (open()) {
+  <div class="drawer-backdrop" (click)="close()"></div>
+
+  <aside class="ai-drawer" role="dialog" aria-label="AI Assistant">
+    <header class="drawer-header">
+      <h2>AI Assistant</h2>
+      <button type="button" class="close-btn" (click)="close()" aria-label="Chiudi">✕</button>
+    </header>
+
+    @if (!aiService.isConfigured()) {
+      <div class="setup-banner">
+        <p>Configura la tua API key OpenRouter per usare l'assistente.</p>
+        <app-ai-settings />
+      </div>
+    } @else {
+      <nav class="tabs" role="tablist">
+        @for (tab of tabs; track tab.id) {
+          <button
+            type="button"
+            class="tab"
+            [class.active]="activeTab() === tab.id"
+            (click)="selectTab(tab.id)"
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </nav>
+
+      <div class="drawer-body">
+        @switch (activeTab()) {
+          @case ('build') {
+            <div class="tab-panel">
+              <label for="concept-query">Idea del personaggio</label>
+              <textarea
+                id="concept-query"
+                rows="3"
+                [value]="conceptQuery()"
+                (input)="setConceptQuery($event)"
+                placeholder="Es. un guerriero elfico che diventa arciere arcano…"
+              ></textarea>
+              <button
+                type="button"
+                class="primary"
+                (click)="runBuildAdvice()"
+                [disabled]="aiService.isLoading()"
+              >
+                {{ aiService.isLoading() ? 'Generazione…' : 'Chiedi consiglio' }}
+              </button>
+
+              @if (buildResult()) {
+                <p class="result">{{ buildResult() }}</p>
+              }
+            </div>
+          }
+
+          @case ('lore') {
+            <div class="tab-panel">
+              <p class="muted">
+                Genera background narrativo, agganci di trama e tratti di personalità per il
+                personaggio attuale.
+              </p>
+              <button
+                type="button"
+                class="primary"
+                (click)="runGenerateLore()"
+                [disabled]="aiService.isLoading()"
+              >
+                {{ aiService.isLoading() ? 'Generazione…' : 'Genera lore' }}
+              </button>
+
+              @if (loreResult()) {
+                <p class="result">{{ loreResult() }}</p>
+              }
+            </div>
+          }
+
+          @case ('rules') {
+            <div class="tab-panel">
+              <div class="chat-log">
+                @for (entry of chatHistory(); track $index) {
+                  <div class="chat-entry" [class.user]="entry.role === 'user'">
+                    <strong>{{ entry.role === 'user' ? 'Tu' : 'Arbitro' }}</strong>
+                    <p>{{ entry.content }}</p>
+                  </div>
+                } @empty {
+                  <p class="muted">Fai una domanda sulle regole D&D 3.5.</p>
+                }
+              </div>
+
+              <div class="chat-input">
+                <input
+                  type="text"
+                  [value]="question()"
+                  (input)="setQuestion($event)"
+                  placeholder="La tua domanda sulle regole…"
+                />
+                <button type="button" (click)="askQuestion()" [disabled]="aiService.isLoading()">
+                  Invia
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      @if (aiService.error()) {
+        <p class="error">{{ aiService.error() }}</p>
+      }
+    }
+  </aside>
+}

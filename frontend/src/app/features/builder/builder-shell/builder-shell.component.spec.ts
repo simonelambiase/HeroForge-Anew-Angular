@@ -34,4 +34,17 @@ describe('BuilderShellComponent', () => {
 
     expect(fixture.nativeElement.querySelector('app-race-step')).toBeTruthy();
   });
+
+  it('should toggle the AI assistant panel', () => {
+    const fixture = TestBed.createComponent(BuilderShellComponent);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('.ai-assistant-btn') as HTMLButtonElement;
+    expect(button).toBeTruthy();
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.aiPanelOpen()).toBe(true);
+  });
 });

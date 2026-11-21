@@ -1,0 +1,46 @@
+<section class="ai-settings">
+  <div class="field">
+    <label for="openrouter-api-key">API Key OpenRouter</label>
+    <input
+      id="openrouter-api-key"
+      type="password"
+      [value]="draftApiKey()"
+      (input)="onApiKeyInput($event)"
+      placeholder="Inserisci la tua API key"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="field">
+    <label for="openrouter-model">Modello</label>
+    <select id="openrouter-model" [value]="service.selectedModel().id" (change)="onModelChange($event)">
+      @for (model of service.models; track model.id) {
+        <option [value]="model.id">{{ model.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="save-btn" (click)="saveApiKey()">Salva</button>
+    <button type="button" class="test-btn" (click)="testConnection()" [disabled]="testing()">
+      {{ testing() ? 'Test in corso…' : 'Testa connessione' }}
+    </button>
+    <button type="button" class="clear-btn" (click)="clearApiKey()">Rimuovi key</button>
+  </div>
+
+  @if (service.isConfigured()) {
+    <p class="status positive">API key configurata.</p>
+  } @else {
+    <p class="status muted">Nessuna API key configurata.</p>
+  }
+
+  @if (testStatus()) {
+    <p
+      class="status"
+      [class.positive]="testStatus()?.startsWith('Connessione')"
+      [class.negative]="testStatus()?.startsWith('Test')"
+    >
+      {{ testStatus() }}
+    </p>
+  }
+</section>

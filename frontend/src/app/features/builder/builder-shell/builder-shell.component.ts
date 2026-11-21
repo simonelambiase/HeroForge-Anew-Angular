@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../core/services/character.service';
+import { OpenRouterService } from '../../../core/services/openrouter.service';
 import { BadgeIndicatorComponent } from '../../../shared/components/badge-indicator/badge-indicator.component';
 import { StepStepperComponent } from '../../../shared/components/step-stepper/step-stepper.component';
+import { AiAssistantPanelComponent } from '../../ai-advisor/components/ai-assistant-panel/ai-assistant-panel.component';
 import { AbilitiesStepComponent } from '../steps/abilities-step/abilities-step.component';
 import { RaceStepComponent } from '../steps/race-step/race-step.component';
 import { ClassStepComponent } from '../steps/class-step/class-step.component';
@@ -14,6 +16,7 @@ import { SheetPreviewComponent } from '../steps/sheet-preview/sheet-preview.comp
   imports: [
     StepStepperComponent,
     BadgeIndicatorComponent,
+    AiAssistantPanelComponent,
     AbilitiesStepComponent,
     RaceStepComponent,
     ClassStepComponent,
@@ -25,8 +28,10 @@ import { SheetPreviewComponent } from '../steps/sheet-preview/sheet-preview.comp
 })
 export class BuilderShellComponent {
   readonly service = inject(CharacterService);
+  readonly aiService = inject(OpenRouterService);
   readonly stepLabels = ['Abilità', 'Razza', 'Classe', 'Scheda'];
   readonly currentStep = signal<number>(0);
+  readonly aiPanelOpen = signal<boolean>(false);
 
   readonly bab = computed(() => this.formatSigned(this.service.baseAttackBonus()));
   readonly armorClass = computed(() => `${this.service.armorClass()}`);
@@ -41,6 +46,10 @@ export class BuilderShellComponent {
 
   next(): void {
     this.currentStep.update((value) => Math.min(this.stepLabels.length - 1, value + 1));
+  }
+
+  toggleAiPanel(): void {
+    this.aiPanelOpen.update((value) => !value);
   }
 
   private formatSigned(value: number): string {

@@ -1,7 +1,15 @@
 <div class="builder-shell">
   <header class="builder-header">
-    <h1>Hakrom</h1>
-    <p>Creatore Personaggio D&amp;D 3.5</p>
+    <div class="header-text">
+      <h1>Hakrom</h1>
+      <p>Creatore Personaggio D&amp;D 3.5</p>
+    </div>
+    <button type="button" class="ai-assistant-btn" (click)="toggleAiPanel()">
+      AI Assistant
+      @if (!aiService.isConfigured()) {
+        <span class="config-badge">Configura</span>
+      }
+    </button>
   </header>
 
   <app-step-stepper [steps]="stepLabels" [(currentStep)]="currentStep" />
@@ -45,4 +53,6 @@
       Avanti
     </button>
   </footer>
+
+  <app-ai-assistant-panel [(open)]="aiPanelOpen" />
 </div>
