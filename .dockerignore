@@ -1,9 +1,5 @@
 node_modules
+dist
 .git
-.github
 *.xlsm
 data/ClassInfo.xlsx
-frontend/node_modules
-frontend/dist
-.gemini
-C:\Users\simon\.gemini
