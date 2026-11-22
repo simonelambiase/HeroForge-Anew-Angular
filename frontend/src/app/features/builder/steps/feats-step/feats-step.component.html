@@ -1,7 +1,7 @@
 <div class="feats-step">
-  <app-card-panel title="Talenti" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('feats.title')" [collapsible]="false">
     <div class="feats-toolbar">
-      <div class="filter-group" role="group" aria-label="Filtra per tipo">
+      <div class="filter-group" role="group" [attr.aria-label]="i18n.t('feats.filter')">
         @for (type of filters; track type) {
           <button
             type="button"
@@ -9,21 +9,21 @@
             [class.active]="filter() === type"
             (click)="filter.set(type)"
           >
-            {{ type === 'all' ? 'Tutti' : typeLabels[type] }}
+            {{ type === 'all' ? i18n.t('feats.all') : i18n.getFeatTypeName(type) }}
           </button>
         }
       </div>
       <span class="feats-count" [class.negative]="selectedCount() > service.availableFeatsCount()">
-        {{ selectedCount() }} / {{ service.availableFeatsCount() }} talenti
+        {{ i18n.t('feats.count', { selected: selectedCount(), available: service.availableFeatsCount() }) }}
       </span>
     </div>
 
     <div class="feats-grid">
       @for (feat of filteredFeats(); track feat.id) {
         <app-selector-card
-          [title]="feat.name"
+          [title]="i18n.getFeatName(feat.id)"
           [description]="featDescription(feat)"
-          [badges]="[typeLabels[feat.type]]"
+          [badges]="[i18n.getFeatTypeName(feat.type)]"
           [selected]="isSelected(feat.id)"
           [disabled]="!canToggle(feat.id)"
           (selectedChange)="toggle(feat)"

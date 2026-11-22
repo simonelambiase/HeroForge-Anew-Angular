@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { ABILITY_ORDER, formatModifier, type AbilityName } from '../../../../core/models/ability-scores.model';
 import {
   RACES,
@@ -9,6 +10,7 @@ import {
   type CustomRace,
   type FlyManeuverability,
   type Race,
+  type RaceSelection,
   type Senses,
   type SizeCategory,
   type Speeds,
@@ -106,19 +108,19 @@ const DEFAULT_CUSTOM_RACE_FORM: CustomRaceForm = {
 })
 export class RaceStepComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly races = RACES;
   readonly abilityOrder = ABILITY_ORDER;
   readonly sizeOptions = Object.keys(SIZE_AC_MODIFIERS) as SizeCategory[];
   readonly flyManeuverabilityOptions: FlyManeuverability[] = ['clumsy', 'poor', 'average', 'good', 'perfect'];
 
-  readonly abilityLabels: Record<AbilityName, string> = {
-    STR: 'Forza',
-    DEX: 'Destrezza',
-    CON: 'Costituzione',
-    INT: 'Intelligenza',
-    WIS: 'Saggezza',
-    CHA: 'Carisma',
-  };
+  readonly abilityLabels = computed<Record<AbilityName, string>>(() => {
+    const labels = {} as Record<AbilityName, string>;
+    for (const name of ABILITY_ORDER) {
+      labels[name] = this.i18n.t('abilities.full.' + name);
+    }
+    return labels;
+  });
 
   readonly searchTerm = signal('');
   readonly form = signal<CustomRaceForm>({ ...DEFAULT_CUSTOM_RACE_FORM });
@@ -128,7 +130,11 @@ export class RaceStepComponent {
     if (!term) {
       return this.races;
     }
-    return this.races.filter((race) => race.name.toLowerCase().includes(term));
+    return this.races.filter(
+      (race) =>
+        this.i18n.getRaceName(race.id).toLowerCase().includes(term) ||
+        race.id.toLowerCase().includes(term),
+    );
   });
 
   constructor() {
@@ -148,12 +154,23 @@ export class RaceStepComponent {
   }
 
   raceDescription(race: Race): string {
-    return `${race.size} · Velocità ${race.baseSpeed}m · Classe preferita: ${race.favoredClass}`;
+    return `${this.i18n.getSizeName(race.size)} · ${this.i18n.t('race.speed')} ${race.baseSpeed}m · ${this.i18n.t('race.favoredClass')}: ${race.favoredClass}`;
+  }
+
+  raceName(race: RaceSelection): string {
+    return isCustomRace(race) ? race.name : this.i18n.getRaceName(race.id);
+  }
+
+  raceTraits(race: RaceSelection): string[] {
+    if (isCustomRace(race)) {
+      return race.racialTraits;
+    }
+    return this.i18n.getRaceTraits(race.id);
   }
 
   abilityModifierBadges(race: Race): string[] {
     return ABILITY_ORDER.filter((name) => (race.abilityModifiers[name] ?? 0) !== 0).map(
-      (name) => `${formatModifier(race.abilityModifiers[name] ?? 0)} ${name}`,
+      (name) => `${formatModifier(race.abilityModifiers[name] ?? 0)} ${this.i18n.t('abilities.short.' + name)}`,
     );
   }
 

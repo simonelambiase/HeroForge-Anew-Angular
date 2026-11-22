@@ -1,19 +1,19 @@
 <div class="equipment-step">
-  <app-card-panel title="Equipaggiamento" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('equipment.title')" [collapsible]="false">
     <div class="equipment-summary">
-      <span class="summary-item">CA: <strong>{{ service.armorClass() }}</strong></span>
-      <span class="summary-item">Peso: <strong>{{ service.totalWeight() }}</strong></span>
+      <span class="summary-item">{{ i18n.t('equipment.armorClass') }}: <strong>{{ service.armorClass() }}</strong></span>
+      <span class="summary-item">{{ i18n.t('equipment.weight') }}: <strong>{{ service.totalWeight() }}</strong></span>
       <span class="summary-item">
-        Carico: <strong>{{ service.loadCategory() }}</strong>
+        {{ i18n.t('equipment.load') }}: <strong>{{ i18n.getLoadCategoryName(service.loadCategory()) }}</strong>
         ({{ service.carryingCapacity().light }} / {{ service.carryingCapacity().medium }} /
         {{ service.carryingCapacity().heavy }})
       </span>
-      <span class="summary-item">Penalità prova: <strong>{{ armorCheckPenalty() }}</strong></span>
+      <span class="summary-item">{{ i18n.t('equipment.checkPenalty') }}: <strong>{{ armorCheckPenalty() }}</strong></span>
     </div>
   </app-card-panel>
 
-  <app-card-panel title="Armi" [collapsible]="false">
-    <div class="filter-group" role="group" aria-label="Filtra armi">
+  <app-card-panel [title]="i18n.t('equipment.weapons')" [collapsible]="false">
+    <div class="filter-group" role="group" [attr.aria-label]="i18n.t('equipment.filterWeapons')">
       @for (type of weaponFilters; track type) {
         <button
           type="button"
@@ -21,7 +21,7 @@
           [class.active]="weaponFilter() === type"
           (click)="weaponFilter.set(type)"
         >
-          {{ type === 'all' ? 'Tutte' : weaponCategoryLabels[type] }}
+          {{ type === 'all' ? i18n.t('equipment.all') : i18n.getWeaponCategoryName(type) }}
         </button>
       }
     </div>
@@ -29,7 +29,7 @@
     <div class="equipment-grid">
       @for (weapon of filteredWeapons(); track weapon.id) {
         <app-selector-card
-          [title]="weapon.name"
+          [title]="i18n.getWeaponName(weapon.id)"
           [description]="weaponDescription(weapon)"
           [badges]="weaponBadges(weapon)"
           [selected]="isWeaponEquipped(weapon.id)"
@@ -39,8 +39,8 @@
     </div>
   </app-card-panel>
 
-  <app-card-panel title="Armature e scudi" [collapsible]="false">
-    <div class="filter-group" role="group" aria-label="Filtra armature">
+  <app-card-panel [title]="i18n.t('equipment.armorAndShields')" [collapsible]="false">
+    <div class="filter-group" role="group" [attr.aria-label]="i18n.t('equipment.filterArmor')">
       @for (type of armorFilters; track type) {
         <button
           type="button"
@@ -48,7 +48,7 @@
           [class.active]="armorFilter() === type"
           (click)="armorFilter.set(type)"
         >
-          {{ type === 'all' ? 'Tutte' : armorTypeLabels[type] }}
+          {{ type === 'all' ? i18n.t('equipment.all') : i18n.getArmorTypeName(type) }}
         </button>
       }
     </div>
@@ -56,7 +56,7 @@
     <div class="equipment-grid">
       @for (armor of filteredArmors(); track armor.id) {
         <app-selector-card
-          [title]="armor.name"
+          [title]="i18n.getArmorName(armor.id)"
           [description]="armorDescription(armor)"
           [badges]="armorBadges(armor)"
           [selected]="isArmorEquipped(armor.id)"

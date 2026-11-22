@@ -1,14 +1,14 @@
 <div class="class-step">
-  <app-card-panel title="Scegli le classi" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('class.choose')" [collapsible]="false">
     <div class="category-tabs">
-      @for (category of categories; track category.id) {
+      @for (category of categories; track category) {
         <button
           type="button"
           class="category-tab"
-          [class.active]="activeCategory() === category.id"
-          (click)="selectCategory(category.id)"
+          [class.active]="activeCategory() === category"
+          (click)="selectCategory(category)"
         >
-          {{ category.label }}
+          {{ categoryLabel(category) }}
         </button>
       }
     </div>
@@ -16,7 +16,7 @@
     <div class="class-grid">
       @for (characterClass of visibleClasses(); track characterClass.id) {
         <app-selector-card
-          [title]="characterClass.name"
+          [title]="i18n.getClassName(characterClass.id)"
           [description]="classDescription(characterClass)"
           [badges]="saveBadges(characterClass)"
           [selected]="isSelected(characterClass.id)"
@@ -26,19 +26,19 @@
     </div>
   </app-card-panel>
 
-  <app-card-panel title="Livelli assegnati" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('class.assigned')" [collapsible]="false">
     @if (service.classLevels().length === 0) {
-      <p class="empty">Nessuna classe selezionata.</p>
+      <p class="empty">{{ i18n.t('class.noClass') }}</p>
     } @else {
       <ul class="level-list">
         @for (classLevel of service.classLevels(); track classLevel.classId) {
           <li class="level-row">
             <span class="level-name">{{ className(classLevel.classId) }}</span>
-            <span class="level-count">Livello {{ classLevel.level }}</span>
+            <span class="level-count">{{ i18n.t('class.level') }} {{ classLevel.level }}</span>
             <div class="level-actions">
               <button type="button" (click)="decrementLevel(classLevel.classId)">−</button>
               <button type="button" (click)="incrementLevel(classLevel.classId)">+</button>
-              <button type="button" (click)="removeClass(classLevel.classId)">Rimuovi</button>
+              <button type="button" (click)="removeClass(classLevel.classId)">{{ i18n.t('class.remove') }}</button>
             </div>
           </li>
         }
@@ -47,7 +47,7 @@
   </app-card-panel>
 
   @if (classLevelsWithOptions().length > 0) {
-    <app-card-panel title="Opzioni e Specializzazioni di Classe" [collapsible]="false">
+    <app-card-panel [title]="i18n.t('class.options')" [collapsible]="false">
       <div class="options-list">
         @for (classLevel of classLevelsWithOptions(); track classLevel.classId) {
           <section class="option-card">
@@ -56,20 +56,20 @@
             @switch (classLevel.classId) {
               @case ('cleric') {
                 <div class="field">
-                  <label class="field-label" for="cleric-deity">Divinità</label>
+                  <label class="field-label" for="cleric-deity">{{ i18n.t('class.deity') }}</label>
                   <select
                     id="cleric-deity"
                     [value]="service.classOptions().cleric.deity"
                     (change)="setClericDeity($event)"
                   >
                     @for (deity of deities; track deity) {
-                      <option [value]="deity">{{ deity }}</option>
+                      <option [value]="deity">{{ i18n.getDeityName(deity) }}</option>
                     }
                   </select>
                 </div>
 
                 <div class="field">
-                  <span class="field-label">Domini (max 2)</span>
+                  <span class="field-label">{{ i18n.t('class.domains') }}</span>
                   <div class="checkbox-grid">
                     @for (domain of domains; track domain.id) {
                       <label class="check" [title]="domain.description">
@@ -78,14 +78,14 @@
                           [checked]="isDomainSelected(domain.id)"
                           (change)="toggleDomain(domain.id)"
                         />
-                        <span>{{ domain.name }}</span>
+                        <span>{{ i18n.getDomainName(domain.id) }}</span>
                       </label>
                     }
                   </div>
                 </div>
 
                 <div class="field">
-                  <span class="field-label">Energia</span>
+                  <span class="field-label">{{ i18n.t('class.energy') }}</span>
                   <div class="radio-row">
                     <label class="check">
                       <input
@@ -95,7 +95,7 @@
                         [checked]="service.classOptions().cleric.channeling === 'turn'"
                         (change)="setClericChanneling($event)"
                       />
-                      <span>Scacciare</span>
+                      <span>{{ i18n.t('class.turn') }}</span>
                     </label>
                     <label class="check">
                       <input
@@ -105,7 +105,7 @@
                         [checked]="service.classOptions().cleric.channeling === 'rebuke'"
                         (change)="setClericChanneling($event)"
                       />
-                      <span>Intimorire</span>
+                      <span>{{ i18n.t('class.rebuke') }}</span>
                     </label>
                   </div>
                 </div>
@@ -113,22 +113,22 @@
 
               @case ('wizard') {
                 <div class="field">
-                  <label class="field-label" for="wizard-specialization">Scuola specialistica</label>
+                  <label class="field-label" for="wizard-specialization">{{ i18n.t('class.specialization') }}</label>
                   <select
                     id="wizard-specialization"
                     [value]="service.classOptions().wizard.specialization"
                     (change)="setWizardSpecialization($event)"
                   >
-                    <option value="generalist">Generalista</option>
+                    <option value="generalist">{{ i18n.getSchoolName('generalist') }}</option>
                     @for (school of magicSchools; track school.id) {
-                      <option [value]="school.id">{{ school.name }}</option>
+                      <option [value]="school.id">{{ i18n.getSchoolName(school.id) }}</option>
                     }
                   </select>
                 </div>
 
                 @if (service.classOptions().wizard.specialization !== 'generalist') {
                   <div class="field">
-                    <span class="field-label">Scuole proibite (max {{ prohibitedSchoolLimit() }})</span>
+                    <span class="field-label">{{ i18n.t('class.prohibited', { max: prohibitedSchoolLimit() }) }}</span>
                     <div class="checkbox-grid">
                       @for (school of magicSchools; track school.id) {
                         <label class="check">
@@ -137,7 +137,7 @@
                             [checked]="isProhibitedSchool(school.id)"
                             (change)="toggleProhibitedSchool(school.id)"
                           />
-                          <span>{{ school.name }}</span>
+                          <span>{{ i18n.getSchoolName(school.id) }}</span>
                         </label>
                       }
                     </div>
@@ -145,15 +145,15 @@
                 }
 
                 <div class="field">
-                  <label class="field-label" for="wizard-familiar">Familiare</label>
+                  <label class="field-label" for="wizard-familiar">{{ i18n.t('class.familiar') }}</label>
                   <select
                     id="wizard-familiar"
                     [value]="service.classOptions().wizard.familiar"
                     (change)="setFamiliar($event)"
                   >
-                    <option value="">Nessuno</option>
+                    <option value="">{{ i18n.t('class.none') }}</option>
                     @for (familiar of familiars; track familiar.id) {
-                      <option [value]="familiar.id">{{ familiar.name }} ({{ familiar.bonus }})</option>
+                      <option [value]="familiar.id">{{ i18n.getFamiliarName(familiar.id) }} ({{ i18n.getFamiliarBonus(familiar.id) }})</option>
                     }
                   </select>
                 </div>
@@ -161,43 +161,43 @@
 
               @case ('ranger') {
                 <div class="field">
-                  <label class="field-label" for="ranger-style">Stile di combattimento</label>
+                  <label class="field-label" for="ranger-style">{{ i18n.t('class.combatStyle') }}</label>
                   <select
                     id="ranger-style"
                     [value]="service.classOptions().ranger.combatStyle"
                     (change)="setRangerCombatStyle($event)"
                   >
                     @for (style of combatStyles; track style.id) {
-                      <option [value]="style.id">{{ style.name }}</option>
+                      <option [value]="style.id">{{ i18n.getCombatStyleName(style.id) }}</option>
                     }
                   </select>
                 </div>
 
                 <div class="field">
-                  <label class="field-label" for="ranger-enemy">Nemico prescelto</label>
+                  <label class="field-label" for="ranger-enemy">{{ i18n.t('class.favoredEnemy') }}</label>
                   <select
                     id="ranger-enemy"
                     [value]="service.classOptions().ranger.favoredEnemy"
                     (change)="setRangerFavoredEnemy($event)"
                   >
-                    <option value="">Seleziona...</option>
+                    <option value="">{{ i18n.t('class.select') }}</option>
                     @for (enemy of favoredEnemies; track enemy) {
-                      <option [value]="enemy">{{ enemy }}</option>
+                      <option [value]="enemy">{{ i18n.getFavoredEnemyName(enemy) }}</option>
                     }
                   </select>
                 </div>
 
                 @if (classLevel.level >= 4) {
                   <div class="field">
-                    <label class="field-label" for="ranger-companion">Compagno animale</label>
+                    <label class="field-label" for="ranger-companion">{{ i18n.t('class.animalCompanion') }}</label>
                     <select
                       id="ranger-companion"
                       [value]="service.classOptions().ranger.animalCompanion"
                       (change)="setRangerAnimalCompanion($event)"
                     >
-                      <option value="">Seleziona...</option>
+                      <option value="">{{ i18n.t('class.select') }}</option>
                       @for (companion of rangerCompanions; track companion) {
-                        <option [value]="companion">{{ companion }}</option>
+                        <option [value]="companion">{{ i18n.getAnimalCompanionName(companion) }}</option>
                       }
                     </select>
                   </div>
@@ -206,14 +206,14 @@
 
               @case ('barbarian') {
                 <div class="field">
-                  <label class="field-label" for="barbarian-rage">Stile d'ira / Totem</label>
+                  <label class="field-label" for="barbarian-rage">{{ i18n.t('class.rageStyle') }}</label>
                   <select
                     id="barbarian-rage"
                     [value]="service.classOptions().barbarian.rageVariant"
                     (change)="setRageVariant($event)"
                   >
                     @for (variant of rageVariants; track variant.id) {
-                      <option [value]="variant.id">{{ variant.name }}</option>
+                      <option [value]="variant.id">{{ i18n.getRageVariantName(variant.id) }}</option>
                     }
                   </select>
                   <p class="hint">{{ rageDescription() }}</p>
@@ -222,15 +222,15 @@
 
               @case ('druid') {
                 <div class="field">
-                  <label class="field-label" for="druid-companion">Compagno animale</label>
+                  <label class="field-label" for="druid-companion">{{ i18n.t('class.animalCompanion') }}</label>
                   <select
                     id="druid-companion"
                     [value]="service.classOptions().druid.animalCompanion"
                     (change)="setDruidAnimalCompanion($event)"
                   >
-                    <option value="">Seleziona...</option>
+                    <option value="">{{ i18n.t('class.select') }}</option>
                     @for (companion of druidCompanions; track companion) {
-                      <option [value]="companion">{{ companion }}</option>
+                      <option [value]="companion">{{ i18n.getAnimalCompanionName(companion) }}</option>
                     }
                   </select>
                 </div>
@@ -238,14 +238,14 @@
 
               @case ('monk') {
                 <div class="field">
-                  <label class="field-label" for="monk-style">Stile marziale</label>
+                  <label class="field-label" for="monk-style">{{ i18n.t('class.monkStyle') }}</label>
                   <select
                     id="monk-style"
                     [value]="service.classOptions().monk.monkStyle"
                     (change)="setMonkStyle($event)"
                   >
                     @for (style of monkStyles; track style.id) {
-                      <option [value]="style.id">{{ style.name }}</option>
+                      <option [value]="style.id">{{ i18n.getMonkStyleName(style.id) }}</option>
                     }
                   </select>
                   <p class="hint">{{ monkDescription() }}</p>

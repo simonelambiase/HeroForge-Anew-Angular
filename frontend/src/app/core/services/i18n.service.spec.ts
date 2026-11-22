@@ -59,4 +59,42 @@ describe('I18nService', () => {
   it('should return the key itself for an unknown key', () => {
     expect(service.t('unknown.key')).toBe('unknown.key');
   });
+
+  it('should resolve game content helpers in italian', () => {
+    expect(service.getClassName('fighter')).toBe('Guerriero');
+    expect(service.getClassCategoryName('core')).toBe('Base PHB');
+    expect(service.getSkillName('appraise')).toBe('Valutare');
+    expect(service.getSkillDescription('appraise')).toBe('Determinare il valore di un oggetto.');
+    expect(service.getRaceName('elf')).toBe('Elfo');
+    expect(service.getRaceTypeName('Umanoide')).toBe('Umanoide');
+    expect(service.getSizeName('Medium')).toBe('Media');
+    expect(service.getFeatName('power-attack')).toBe('Attacco Poderoso');
+    expect(service.getFeatBenefit('toughness')).toBe('+3 punti ferita.');
+    expect(service.getFeatTypeName('combat')).toBe('Combattimento');
+    expect(service.getWeaponName('longsword')).toBe('Spada lunga');
+    expect(service.getWeaponCategoryName('martial')).toBe('Marziali');
+    expect(service.getArmorName('full-plate')).toBe('Armatura a piastre completa');
+    expect(service.getArmorTypeName('heavy')).toBe('Pesante');
+    expect(service.getLoadCategoryName('Leggero')).toBe('Leggero');
+  });
+
+  it('should resolve game content helpers in english', () => {
+    service.setLanguage('en');
+
+    expect(service.getClassName('fighter')).toBe('Fighter');
+    expect(service.getClassCategoryName('core')).toBe('Core PHB');
+    expect(service.getSkillName('appraise')).toBe('Appraise');
+    expect(service.getSkillDescription('appraise')).toBe('Determine the value of an object.');
+    expect(service.getRaceName('elf')).toBe('Elf');
+    expect(service.getRaceTypeName('Umanoide')).toBe('Humanoid');
+    expect(service.getSizeName('Medium')).toBe('Medium');
+    expect(service.getFeatName('power-attack')).toBe('Power Attack');
+    expect(service.getFeatBenefit('toughness')).toBe('+3 hit points.');
+    expect(service.getFeatTypeName('combat')).toBe('Combat');
+    expect(service.getWeaponName('longsword')).toBe('Longsword');
+    expect(service.getWeaponCategoryName('martial')).toBe('Martial');
+    expect(service.getArmorName('full-plate')).toBe('Full Plate');
+    expect(service.getArmorTypeName('heavy')).toBe('Heavy');
+    expect(service.getLoadCategoryName('Leggero')).toBe('Light');
+  });
 });

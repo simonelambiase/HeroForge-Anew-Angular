@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 
 import {
   ABILITY_ORDER,
@@ -44,6 +44,7 @@ import {
   type CarryingCapacity,
   type Weapon,
 } from '../models/equipment.model';
+import { I18nService } from './i18n.service';
 
 export interface SavingThrows {
   fortitude: number;
@@ -53,6 +54,7 @@ export interface SavingThrows {
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
+  private readonly i18n = inject(I18nService);
   private readonly _characterName = signal('');
   private readonly _abilities = signal<Record<AbilityName, number>>({ ...DEFAULT_ABILITIES });
   private readonly _selectedRace = signal<RaceSelection | null>(null);
@@ -493,9 +495,15 @@ export class CharacterService {
       return true;
     }
 
+    const aliases = new Set<string>([
+      skill.id,
+      skill.name,
+      this.i18n.getSkillNameFor('en', skillId),
+    ]);
+
     return this._classLevels().some((classLevel) => {
       const characterClass = this.findClass(classLevel.classId);
-      return characterClass?.classSkills.includes(skill.name) ?? false;
+      return characterClass?.classSkills.some((classSkill) => aliases.has(classSkill)) ?? false;
     });
   }
 

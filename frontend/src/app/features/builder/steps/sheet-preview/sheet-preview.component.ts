@@ -1,16 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { ABILITY_ORDER, formatModifier, type AbilityName } from '../../../../core/models/ability-scores.model';
-import { CLASSES } from '../../../../core/models/class.model';
-import {
-  CLASS_IDS_WITH_OPTIONS,
-  MONK_STYLES,
-  RAGE_VARIANTS,
-  domainName,
-  familiarName,
-  schoolName,
-} from '../../../../core/models/class-options.model';
+import { SKILLS } from '../../../../core/models/skill.model';
+import { isCustomRace } from '../../../../core/models/race.model';
+import { CLASS_IDS_WITH_OPTIONS } from '../../../../core/models/class-options.model';
 import type { CharacterSheet } from '../../../../core/models/character.model';
 import { BadgeIndicatorComponent } from '../../../../shared/components/badge-indicator/badge-indicator.component';
 
@@ -24,16 +19,16 @@ import { BadgeIndicatorComponent } from '../../../../shared/components/badge-ind
 })
 export class SheetPreviewComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly abilityOrder = ABILITY_ORDER;
 
-  readonly abilityLabels: Record<AbilityName, string> = {
-    STR: 'Forza',
-    DEX: 'Destrezza',
-    CON: 'Costituzione',
-    INT: 'Intelligenza',
-    WIS: 'Saggezza',
-    CHA: 'Carisma',
-  };
+  readonly abilityLabels = computed<Record<AbilityName, string>>(() => {
+    const labels = {} as Record<AbilityName, string>;
+    for (const name of ABILITY_ORDER) {
+      labels[name] = this.i18n.t('abilities.full.' + name);
+    }
+    return labels;
+  });
 
   readonly babLabel = computed(() => this.formatSigned(this.service.baseAttackBonus()));
   readonly armorClass = computed(() => `${this.service.armorClass()}`);
@@ -41,6 +36,10 @@ export class SheetPreviewComponent {
   readonly fortitude = computed(() => this.formatSigned(this.service.savingThrows().fortitude));
   readonly reflex = computed(() => this.formatSigned(this.service.savingThrows().reflex));
   readonly will = computed(() => this.formatSigned(this.service.savingThrows().will));
+
+  readonly selectedSkills = computed(() =>
+    SKILLS.filter((skill) => (this.service.skillRanks()[skill.id] ?? 0) > 0),
+  );
 
   readonly classLevelsWithOptions = computed(() =>
     this.service.classLevels().filter((classLevel) => CLASS_IDS_WITH_OPTIONS.includes(classLevel.classId)),
@@ -59,8 +58,16 @@ export class SheetPreviewComponent {
     return this.formatSigned(value);
   }
 
+  raceName(): string {
+    const race = this.service.selectedRace();
+    if (!race) {
+      return this.i18n.t('sheet.noRace');
+    }
+    return isCustomRace(race) ? race.name : this.i18n.getRaceName(race.id);
+  }
+
   className(classId: string): string {
-    return CLASSES.find((characterClass) => characterClass.id === classId)?.name ?? classId;
+    return this.i18n.getClassName(classId);
   }
 
   classOptionsSummary(classId: string): string {
@@ -68,39 +75,56 @@ export class SheetPreviewComponent {
 
     switch (classId) {
       case 'cleric': {
-        const domains = options.cleric.domains.map(domainName).join(', ') || '—';
-        const channeling = options.cleric.channeling === 'turn' ? 'Scacciare' : 'Intimorire';
-        return `Divinità: ${options.cleric.deity} | Domini: ${domains} | ${channeling}`;
+        const domains = options.cleric.domains.map((id) => this.i18n.getDomainName(id)).join(', ') || '—';
+        const channeling =
+          options.cleric.channeling === 'turn' ? this.i18n.t('class.turn') : this.i18n.t('class.rebuke');
+        return this.i18n.t('sheet.clericSummary', {
+          deity: this.i18n.getDeityName(options.cleric.deity),
+          domains,
+          channeling,
+        });
       }
       case 'wizard': {
-        const specialization = schoolName(options.wizard.specialization);
-        const prohibited = options.wizard.prohibitedSchools.map(schoolName).join(', ');
-        const familiar = options.wizard.familiar ? familiarName(options.wizard.familiar) : '—';
-        const prohibitedText = prohibited ? ` (Proibite: ${prohibited})` : '';
-        return `Scuola: ${specialization}${prohibitedText} | Familiare: ${familiar}`;
+        const specialization = this.i18n.getSchoolName(options.wizard.specialization);
+        const prohibited = options.wizard.prohibitedSchools
+          .map((id) => this.i18n.getSchoolName(id))
+          .join(', ');
+        const familiar = options.wizard.familiar
+          ? this.i18n.getFamiliarName(options.wizard.familiar)
+          : '—';
+        const prohibitedText = prohibited ? ` (${this.i18n.t('sheet.prohibited')}: ${prohibited})` : '';
+        return this.i18n.t('sheet.wizardSummary', {
+          specialization,
+          prohibited: prohibitedText,
+          familiar,
+        });
       }
       case 'ranger': {
-        const style =
-          options.ranger.combatStyle === 'archery'
-            ? 'Tiro con l\u2019Arco'
-            : 'Combattere con Due Armi';
-        const enemy = options.ranger.favoredEnemy || '—';
-        const companion = options.ranger.animalCompanion || '—';
-        return `Stile: ${style} | Nemico prescelto: ${enemy} | Compagno: ${companion}`;
+        const style = this.i18n.getCombatStyleName(options.ranger.combatStyle);
+        const enemy = options.ranger.favoredEnemy
+          ? this.i18n.getFavoredEnemyName(options.ranger.favoredEnemy)
+          : '—';
+        const companion = options.ranger.animalCompanion
+          ? this.i18n.getAnimalCompanionName(options.ranger.animalCompanion)
+          : '—';
+        return this.i18n.t('sheet.rangerSummary', { style, enemy, companion });
       }
       case 'barbarian': {
-        const variant =
-          RAGE_VARIANTS.find((item) => item.id === options.barbarian.rageVariant)?.name ??
-          options.barbarian.rageVariant;
-        return `Ira: ${variant}`;
+        return this.i18n.t('sheet.barbarianSummary', {
+          variant: this.i18n.getRageVariantName(options.barbarian.rageVariant),
+        });
       }
       case 'druid': {
-        return `Compagno animale: ${options.druid.animalCompanion || '—'}`;
+        return this.i18n.t('sheet.druidSummary', {
+          companion: options.druid.animalCompanion
+            ? this.i18n.getAnimalCompanionName(options.druid.animalCompanion)
+            : '—',
+        });
       }
       case 'monk': {
-        const style =
-          MONK_STYLES.find((item) => item.id === options.monk.monkStyle)?.name ?? options.monk.monkStyle;
-        return `Stile: ${style}`;
+        return this.i18n.t('sheet.monkSummary', {
+          style: this.i18n.getMonkStyleName(options.monk.monkStyle),
+        });
       }
       default:
         return '';
@@ -109,7 +133,7 @@ export class SheetPreviewComponent {
 
   toJson(): CharacterSheet {
     return {
-      name: this.service.characterName() || 'Senza nome',
+      name: this.service.characterName() || this.i18n.t('sheet.unnamed'),
       baseAbilities: { ...this.service.abilities() },
       race: this.service.selectedRace(),
       classLevels: [...this.service.classLevels()],

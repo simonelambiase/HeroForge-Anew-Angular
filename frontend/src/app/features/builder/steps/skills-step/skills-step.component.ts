@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { SKILLS, type SkillDefinition } from '../../../../core/models/skill.model';
-import { formatModifier, type AbilityName } from '../../../../core/models/ability-scores.model';
+import { formatModifier } from '../../../../core/models/ability-scores.model';
 import { CardPanelComponent } from '../../../../shared/components/card-panel/card-panel.component';
 
 @Component({
@@ -15,17 +16,9 @@ import { CardPanelComponent } from '../../../../shared/components/card-panel/car
 })
 export class SkillsStepComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly skills = SKILLS;
   readonly searchQuery = signal('');
-
-  readonly abilityLabels: Record<AbilityName, string> = {
-    STR: 'Forza',
-    DEX: 'Destrezza',
-    CON: 'Costituzione',
-    INT: 'Intelligenza',
-    WIS: 'Saggezza',
-    CHA: 'Carisma',
-  };
 
   readonly filteredSkills = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -35,7 +28,8 @@ export class SkillsStepComponent {
 
     return this.skills.filter(
       (skill) =>
-        skill.name.toLowerCase().includes(query) || skill.id.toLowerCase().includes(query),
+        this.i18n.getSkillName(skill.id).toLowerCase().includes(query) ||
+        skill.id.toLowerCase().includes(query),
     );
   });
 

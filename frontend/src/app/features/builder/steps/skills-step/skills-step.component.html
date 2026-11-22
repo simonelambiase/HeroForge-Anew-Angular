@@ -1,18 +1,19 @@
 <div class="skills-step">
-  <app-card-panel title="Abilità" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('skills.title')" [collapsible]="false">
     <div class="skills-toolbar">
       <input
         type="search"
         class="search-input"
-        placeholder="Cerca un'abilità..."
+        [placeholder]="i18n.t('skills.search')"
         [value]="searchQuery()"
         (input)="updateSearchQuery($event)"
       />
       <span class="points-badge" [class.negative]="service.remainingSkillPoints() < 0">
-        Punti rimanenti: {{ service.remainingSkillPoints() }}
+        {{ i18n.t('skills.remaining') }}: {{ service.remainingSkillPoints() }}
       </span>
       <span class="limits">
-        Max classe: {{ service.maxClassSkillRanks() }} · Max cross: {{ service.maxCrossClassSkillRanks() }}
+        {{ i18n.t('skills.maxClass') }}: {{ service.maxClassSkillRanks() }} ·
+        {{ i18n.t('skills.maxCross') }}: {{ service.maxCrossClassSkillRanks() }}
       </span>
     </div>
 
@@ -20,29 +21,30 @@
       <table class="skills-table">
         <thead>
           <tr>
-            <th>Abilità</th>
-            <th>Caratteristica</th>
-            <th>Tipo</th>
-            <th>Gradi</th>
-            <th>Totale</th>
+            <th>{{ i18n.t('skills.ability') }}</th>
+            <th>{{ i18n.t('skills.characteristic') }}</th>
+            <th>{{ i18n.t('skills.type') }}</th>
+            <th>{{ i18n.t('skills.ranks') }}</th>
+            <th>{{ i18n.t('skills.total') }}</th>
           </tr>
         </thead>
         <tbody>
           @for (skill of filteredSkills(); track skill.id) {
             <tr>
               <td>
-                <span class="skill-name">{{ skill.name }}</span>
+                <span class="skill-name">{{ i18n.getSkillName(skill.id) }}</span>
+                <span class="skill-description">{{ i18n.getSkillDescription(skill.id) }}</span>
                 @if (!skill.untrained) {
-                  <span class="trained-only">Solo addestrata</span>
+                  <span class="trained-only">{{ i18n.t('skills.trainedOnly') }}</span>
                 }
               </td>
               <td>
-                {{ abilityLabels[skill.keyAbility] }}
+                {{ i18n.t('abilities.short.' + skill.keyAbility) }}
                 ({{ keyAbilityModifier(skill) }})
               </td>
               <td>
                 <span class="type-badge" [class.cross]="!isClassSkill(skill.id)">
-                  {{ isClassSkill(skill.id) ? 'Classe' : 'Cross' }}
+                  {{ i18n.t(isClassSkill(skill.id) ? 'skills.classSkill' : 'skills.crossSkill') }}
                 </span>
               </td>
               <td>

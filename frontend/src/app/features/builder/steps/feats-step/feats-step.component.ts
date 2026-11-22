@@ -1,12 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
-import {
-  FEATS,
-  FEAT_TYPE_LABELS,
-  type Feat,
-  type FeatType,
-} from '../../../../core/models/feat.model';
+import { I18nService } from '../../../../core/services/i18n.service';
+import { FEATS, type Feat, type FeatType } from '../../../../core/models/feat.model';
 import { CardPanelComponent } from '../../../../shared/components/card-panel/card-panel.component';
 import { SelectorCardComponent } from '../../../../shared/components/selector-card/selector-card.component';
 
@@ -22,8 +18,8 @@ type FeatFilter = 'all' | FeatType;
 })
 export class FeatsStepComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly feats = FEATS;
-  readonly typeLabels = FEAT_TYPE_LABELS;
   readonly filter = signal<FeatFilter>('all');
 
   readonly filters: FeatFilter[] = [
@@ -67,7 +63,10 @@ export class FeatsStepComponent {
   }
 
   featDescription(feat: Feat): string {
-    const prerequisite = feat.prerequisites ? `Requisiti: ${feat.prerequisites}` : 'Nessun requisito';
-    return `${prerequisite}. ${feat.benefit}`;
+    const prerequisite = this.i18n.getFeatPrerequisite(feat.id);
+    const prefix = prerequisite
+      ? `${this.i18n.t('feats.prerequisitesLabel')}: ${prerequisite}`
+      : this.i18n.t('feats.noPrerequisite');
+    return `${prefix}. ${this.i18n.getFeatBenefit(feat.id)}`;
   }
 }

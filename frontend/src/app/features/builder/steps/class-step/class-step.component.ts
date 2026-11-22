@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import {
   CLASSES,
   type BabProgression,
@@ -41,14 +42,10 @@ type ClassCategoryFilter = ClassCategory | 'all';
 })
 export class ClassStepComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly classes = CLASSES;
 
-  readonly categories: readonly { id: ClassCategoryFilter; label: string }[] = [
-    { id: 'all', label: 'Tutte' },
-    { id: 'core', label: 'Base PHB' },
-    { id: 'base-expanded', label: 'Avanzate' },
-    { id: 'prestige', label: 'Prestigio' },
-  ];
+  readonly categories: readonly ClassCategoryFilter[] = ['all', 'core', 'base-expanded', 'prestige'];
 
   readonly activeCategory = signal<ClassCategoryFilter>('all');
 
@@ -68,16 +65,12 @@ export class ClassStepComponent {
     this.maxProhibitedSchools(this.service.classOptions().wizard.specialization),
   );
 
-  readonly rageDescription = computed(
-    () =>
-      RAGE_VARIANTS.find((variant) => variant.id === this.service.classOptions().barbarian.rageVariant)
-        ?.description ?? '',
+  readonly rageDescription = computed(() =>
+    this.i18n.getRageVariantDescription(this.service.classOptions().barbarian.rageVariant),
   );
 
-  readonly monkDescription = computed(
-    () =>
-      MONK_STYLES.find((style) => style.id === this.service.classOptions().monk.monkStyle)
-        ?.description ?? '',
+  readonly monkDescription = computed(() =>
+    this.i18n.getMonkStyleDescription(this.service.classOptions().monk.monkStyle),
   );
 
   readonly deities = DEITIES;
@@ -90,6 +83,12 @@ export class ClassStepComponent {
   readonly druidCompanions = DRUID_ANIMAL_COMPANIONS;
   readonly rageVariants = RAGE_VARIANTS;
   readonly monkStyles = MONK_STYLES;
+
+  categoryLabel(category: ClassCategoryFilter): string {
+    return category === 'all'
+      ? this.i18n.t('class.all')
+      : this.i18n.getClassCategoryName(category);
+  }
 
   selectCategory(category: ClassCategoryFilter): void {
     this.activeCategory.set(category);
@@ -120,34 +119,34 @@ export class ClassStepComponent {
   }
 
   className(classId: string): string {
-    return CLASSES.find((characterClass) => characterClass.id === classId)?.name ?? classId;
+    return this.i18n.getClassName(classId);
   }
 
   classDescription(characterClass: CharacterClass): string {
-    return `DV d${characterClass.hitDie} · BAB ${this.babLabel(characterClass.babProgression)} · ${characterClass.skillPointsPerLevel} abilità`;
+    return `${this.i18n.t('class.hitDie')} d${characterClass.hitDie} · BAB ${this.babLabel(characterClass.babProgression)} · ${characterClass.skillPointsPerLevel} ${this.i18n.t('class.skillPoints')}`;
   }
 
   saveBadges(characterClass: CharacterClass): string[] {
     return [
-      `Tempra ${this.saveLabel(characterClass.fortProgression)}`,
-      `Riflessi ${this.saveLabel(characterClass.refProgression)}`,
-      `Volontà ${this.saveLabel(characterClass.willProgression)}`,
+      `${this.i18n.t('badges.fortitude')} ${this.saveLabel(characterClass.fortProgression)}`,
+      `${this.i18n.t('badges.reflex')} ${this.saveLabel(characterClass.refProgression)}`,
+      `${this.i18n.t('badges.will')} ${this.saveLabel(characterClass.willProgression)}`,
     ];
   }
 
   babLabel(progression: BabProgression): string {
     switch (progression) {
       case 'good':
-        return 'Buono';
+        return this.i18n.t('class.babGood');
       case 'average':
-        return 'Medio';
+        return this.i18n.t('class.babAverage');
       case 'poor':
-        return 'Scarso';
+        return this.i18n.t('class.babPoor');
     }
   }
 
   saveLabel(progression: SaveProgression): string {
-    return progression === 'good' ? 'Buono' : 'Scarso';
+    return progression === 'good' ? this.i18n.t('class.saveGood') : this.i18n.t('class.savePoor');
   }
 
   isDomainSelected(domainId: string): boolean {

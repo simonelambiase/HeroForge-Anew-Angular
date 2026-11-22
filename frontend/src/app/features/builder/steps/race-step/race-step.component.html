@@ -1,20 +1,20 @@
 <div class="race-step">
-  <app-card-panel title="Scegli la razza" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('race.choose')" [collapsible]="false">
     <input
       type="search"
       class="search-input"
-      placeholder="Cerca razza..."
+      [placeholder]="i18n.t('race.search')"
       [value]="searchTerm()"
       (input)="setSearchTerm($event)"
     />
 
     @if (filteredRaces().length === 0) {
-      <p class="empty">Nessuna razza trovata.</p>
+      <p class="empty">{{ i18n.t('race.empty') }}</p>
     } @else {
       <div class="race-grid">
         @for (race of filteredRaces(); track race.id) {
           <app-selector-card
-            [title]="race.name"
+            [title]="i18n.getRaceName(race.id)"
             [description]="raceDescription(race)"
             [badges]="abilityModifierBadges(race)"
             [selected]="isSelected(race.id)"
@@ -25,23 +25,23 @@
     }
   </app-card-panel>
 
-  <app-card-panel title="Razza personalizzata" [collapsible]="false">
+  <app-card-panel [title]="i18n.t('race.custom')" [collapsible]="false">
     <div class="custom-form">
       <div class="field-row">
         <div class="field">
-          <label class="field-label" for="custom-race-name">Nome</label>
+          <label class="field-label" for="custom-race-name">{{ i18n.t('race.name') }}</label>
           <input id="custom-race-name" type="text" [value]="form().name" (input)="setText('name', $event)" />
         </div>
         <div class="field">
-          <label class="field-label" for="custom-race-size">Taglia</label>
+          <label class="field-label" for="custom-race-size">{{ i18n.t('race.size') }}</label>
           <select id="custom-race-size" [value]="form().size" (change)="setSize($event)">
             @for (size of sizeOptions; track size) {
-              <option [value]="size">{{ size }}</option>
+              <option [value]="size">{{ i18n.getSizeName(size) }}</option>
             }
           </select>
         </div>
         <div class="field">
-          <label class="field-label" for="custom-race-favored-class">Classe preferita</label>
+          <label class="field-label" for="custom-race-favored-class">{{ i18n.t('race.favoredClass') }}</label>
           <input
             id="custom-race-favored-class"
             type="text"
@@ -53,15 +53,15 @@
 
       <div class="field-row">
         <div class="field">
-          <label class="field-label" for="custom-race-type">Tipo</label>
+          <label class="field-label" for="custom-race-type">{{ i18n.t('race.type') }}</label>
           <input id="custom-race-type" type="text" [value]="form().type" (input)="setText('type', $event)" />
         </div>
         <div class="field">
-          <label class="field-label" for="custom-race-subtype">Sottotipo</label>
+          <label class="field-label" for="custom-race-subtype">{{ i18n.t('race.subtype') }}</label>
           <input id="custom-race-subtype" type="text" [value]="form().subtype" (input)="setText('subtype', $event)" />
         </div>
         <div class="field">
-          <label class="field-label" for="custom-race-hd">Dadi vita razziali</label>
+          <label class="field-label" for="custom-race-hd">{{ i18n.t('race.racialHitDice') }}</label>
           <input
             id="custom-race-hd"
             type="number"
@@ -71,7 +71,7 @@
           />
         </div>
         <div class="field">
-          <label class="field-label" for="custom-race-natural-armor">CA naturale</label>
+          <label class="field-label" for="custom-race-natural-armor">{{ i18n.t('race.naturalArmor') }}</label>
           <input
             id="custom-race-natural-armor"
             type="number"
@@ -82,11 +82,11 @@
       </div>
 
       <div class="field">
-        <span class="field-label">Modificatori di caratteristica</span>
+        <span class="field-label">{{ i18n.t('race.abilityModifiers') }}</span>
         <div class="ability-grid">
           @for (ability of abilityOrder; track ability) {
             <label class="ability-input">
-              <span>{{ abilityLabels[ability] }}</span>
+              <span>{{ abilityLabels()[ability] }}</span>
               <input
                 type="number"
                 [value]="form()[modifierField(ability)]"
@@ -98,30 +98,30 @@
       </div>
 
       <div class="field">
-        <span class="field-label">Velocità (metri)</span>
+        <span class="field-label">{{ i18n.t('race.speed') }} (m)</span>
         <div class="speed-grid">
           <label class="speed-input">
-            <span>Terreno</span>
+            <span>{{ i18n.t('race.landSpeed') }}</span>
             <input type="number" min="0" [value]="form().landSpeed" (input)="setNumber('landSpeed', $event)" />
           </label>
           <label class="speed-input">
-            <span>Scavare</span>
+            <span>{{ i18n.t('race.burrowSpeed') }}</span>
             <input type="number" min="0" [value]="form().burrowSpeed" (input)="setNumber('burrowSpeed', $event)" />
           </label>
           <label class="speed-input">
-            <span>Scalare</span>
+            <span>{{ i18n.t('race.climbSpeed') }}</span>
             <input type="number" min="0" [value]="form().climbSpeed" (input)="setNumber('climbSpeed', $event)" />
           </label>
           <label class="speed-input">
-            <span>Volare</span>
+            <span>{{ i18n.t('race.flySpeed') }}</span>
             <input type="number" min="0" [value]="form().flySpeed" (input)="setNumber('flySpeed', $event)" />
           </label>
           <label class="speed-input">
-            <span>Nuotare</span>
+            <span>{{ i18n.t('race.swimSpeed') }}</span>
             <input type="number" min="0" [value]="form().swimSpeed" (input)="setNumber('swimSpeed', $event)" />
           </label>
           <label class="speed-input">
-            <span>Manovrabilità volo</span>
+            <span>{{ i18n.t('race.flyManeuverability') }}</span>
             <select [value]="form().flyManeuverability" (change)="setFlyManeuverability($event)">
               @for (maneuverability of flyManeuverabilityOptions; track maneuverability) {
                 <option [value]="maneuverability">{{ maneuverability }}</option>
@@ -132,37 +132,37 @@
       </div>
 
       <div class="field">
-        <span class="field-label">Sensi</span>
+        <span class="field-label">{{ i18n.t('race.senses') }}</span>
         <div class="senses-grid">
           <label class="sense-input">
-            <span>Scurovisione (m)</span>
+            <span>{{ i18n.t('race.darkvision') }}</span>
             <input type="number" min="0" [value]="form().darkvision" (input)="setNumber('darkvision', $event)" />
           </label>
           <label class="sense-input">
-            <span>Vista cieca (m)</span>
+            <span>{{ i18n.t('race.blindsense') }}</span>
             <input type="number" min="0" [value]="form().blindsense" (input)="setNumber('blindsense', $event)" />
           </label>
           <label class="sense-input">
-            <span>Percezione cieca (m)</span>
+            <span>{{ i18n.t('race.blindsight') }}</span>
             <input type="number" min="0" [value]="form().blindsight" (input)="setNumber('blindsight', $event)" />
           </label>
           <label class="sense-check">
             <input type="checkbox" [checked]="form().lowLightVision" (change)="setBoolean('lowLightVision', $event)" />
-            <span>Visione crepuscolare</span>
+            <span>{{ i18n.t('race.lowLightVision') }}</span>
           </label>
           <label class="sense-check">
             <input type="checkbox" [checked]="form().scent" (change)="setBoolean('scent', $event)" />
-            <span>Fiuto</span>
+            <span>{{ i18n.t('race.scent') }}</span>
           </label>
           <label class="sense-input sense-input-wide">
-            <span>Altri sensi</span>
+            <span>{{ i18n.t('race.otherSenses') }}</span>
             <input type="text" [value]="form().otherSenses" (input)="setText('otherSenses', $event)" />
           </label>
         </div>
       </div>
 
       <div class="field">
-        <label class="field-label" for="custom-race-natural-attacks">Attacchi naturali (separati da virgola)</label>
+        <label class="field-label" for="custom-race-natural-attacks">{{ i18n.t('race.naturalAttacks') }}</label>
         <input
           id="custom-race-natural-attacks"
           type="text"
@@ -172,7 +172,7 @@
       </div>
 
       <div class="field">
-        <label class="field-label" for="custom-race-traits">Tratti razziali (uno per riga)</label>
+        <label class="field-label" for="custom-race-traits">{{ i18n.t('race.racialTraits') }}</label>
         <textarea
           id="custom-race-traits"
           rows="4"
@@ -184,9 +184,9 @@
   </app-card-panel>
 
   @if (service.selectedRace(); as race) {
-    <app-card-panel title="Tratti razziali — {{ race.name }}" [collapsible]="false">
+    <app-card-panel [title]="i18n.t('race.traitsTitle') + ' — ' + raceName(race)" [collapsible]="false">
       <ul class="trait-list">
-        @for (trait of race.racialTraits; track trait) {
+        @for (trait of raceTraits(race); track trait) {
           <li>{{ trait }}</li>
         }
       </ul>

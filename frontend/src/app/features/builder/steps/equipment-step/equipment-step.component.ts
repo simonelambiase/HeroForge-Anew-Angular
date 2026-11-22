@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 
 import { CharacterService } from '../../../../core/services/character.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import {
   ARMOR,
-  ARMOR_TYPE_LABELS,
-  WEAPON_CATEGORY_LABELS,
   WEAPONS,
   type Armor,
   type ArmorType,
@@ -27,10 +26,9 @@ type ArmorFilter = 'all' | ArmorType;
 })
 export class EquipmentStepComponent {
   readonly service = inject(CharacterService);
+  readonly i18n = inject(I18nService);
   readonly weapons = WEAPONS;
   readonly armors = ARMOR;
-  readonly weaponCategoryLabels = WEAPON_CATEGORY_LABELS;
-  readonly armorTypeLabels = ARMOR_TYPE_LABELS;
 
   readonly weaponFilter = signal<WeaponFilter>('all');
   readonly armorFilter = signal<ArmorFilter>('all');
@@ -75,24 +73,30 @@ export class EquipmentStepComponent {
   }
 
   weaponDescription(weapon: Weapon): string {
-    const range = weapon.rangeIncrement > 0 ? `Gittata ${weapon.rangeIncrement} m` : 'Mischia';
-    return `Danno ${weapon.damageMedium} · Critico ${weapon.critical} · ${range}`;
+    const range =
+      weapon.rangeIncrement > 0
+        ? `${this.i18n.t('equipment.range')} ${weapon.rangeIncrement} m`
+        : this.i18n.t('equipment.melee');
+    return `${this.i18n.t('equipment.damage')} ${weapon.damageMedium} · ${this.i18n.t('equipment.critical')} ${weapon.critical} · ${range}`;
   }
 
   weaponBadges(weapon: Weapon): string[] {
-    const badges = [this.weaponCategoryLabels[weapon.category]];
+    const badges = [this.i18n.getWeaponCategoryName(weapon.category)];
     if (weapon.rangeIncrement > 0) {
-      badges.push('A distanza');
+      badges.push(this.i18n.t('equipment.ranged'));
     }
     return badges;
   }
 
   armorDescription(armor: Armor): string {
     const maxDex = armor.maxDexBonus === null ? '—' : `${armor.maxDexBonus}`;
-    return `CA +${armor.armorBonus} · DES max ${maxDex} · Penalità ${armor.armorCheckPenalty} · Peso ${armor.weight}`;
+    return `${this.i18n.t('equipment.armorClass')} +${armor.armorBonus} · ${this.i18n.t('equipment.maxDex')} ${maxDex} · ${this.i18n.t('equipment.penalty')} ${armor.armorCheckPenalty} · ${this.i18n.t('equipment.weight')} ${armor.weight}`;
   }
 
   armorBadges(armor: Armor): string[] {
-    return [this.armorTypeLabels[armor.type], `CA +${armor.armorBonus}`];
+    return [
+      this.i18n.getArmorTypeName(armor.type),
+      `${this.i18n.t('equipment.armorClass')} +${armor.armorBonus}`,
+    ];
   }
 }

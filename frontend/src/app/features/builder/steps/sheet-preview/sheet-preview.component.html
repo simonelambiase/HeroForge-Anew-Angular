@@ -3,39 +3,39 @@
     <input
       type="text"
       class="name-input"
-      placeholder="Nome del personaggio"
+      [placeholder]="i18n.t('sheet.namePlaceholder')"
       [value]="service.characterName()"
       (input)="updateName($event)"
     />
     <div class="sheet-actions">
-      <button type="button" (click)="print()">Stampa</button>
-      <button type="button" (click)="exportJson()">Esporta JSON</button>
+      <button type="button" (click)="print()">{{ i18n.t('sheet.print') }}</button>
+      <button type="button" (click)="exportJson()">{{ i18n.t('sheet.exportJson') }}</button>
     </div>
   </header>
 
   <section class="summary-bar">
-    <app-badge-indicator label="BAB" [value]="babLabel()" variant="bab" />
-    <app-badge-indicator label="CA" [value]="armorClass()" variant="ac" />
-    <app-badge-indicator label="Tempra" [value]="fortitude()" variant="save" />
-    <app-badge-indicator label="Riflessi" [value]="reflex()" variant="save" />
-    <app-badge-indicator label="Volontà" [value]="will()" variant="save" />
-    <app-badge-indicator label="PF" [value]="hitPoints()" variant="hp" />
+    <app-badge-indicator [label]="i18n.t('badges.bab')" [value]="babLabel()" variant="bab" />
+    <app-badge-indicator [label]="i18n.t('badges.ac')" [value]="armorClass()" variant="ac" />
+    <app-badge-indicator [label]="i18n.t('badges.fortitude')" [value]="fortitude()" variant="save" />
+    <app-badge-indicator [label]="i18n.t('badges.reflex')" [value]="reflex()" variant="save" />
+    <app-badge-indicator [label]="i18n.t('badges.will')" [value]="will()" variant="save" />
+    <app-badge-indicator [label]="i18n.t('badges.hp')" [value]="hitPoints()" variant="hp" />
   </section>
 
   <section class="sheet-section">
-    <h2>Caratteristiche</h2>
+    <h2>{{ i18n.t('sheet.abilities') }}</h2>
     <table class="ability-table">
       <thead>
         <tr>
-          <th>Caratteristica</th>
-          <th>Punteggio</th>
-          <th>Modificatore</th>
+          <th>{{ i18n.t('sheet.characteristic') }}</th>
+          <th>{{ i18n.t('sheet.score') }}</th>
+          <th>{{ i18n.t('sheet.modifier') }}</th>
         </tr>
       </thead>
       <tbody>
         @for (ability of abilityOrder; track ability) {
           <tr>
-            <td>{{ abilityLabels[ability] }}</td>
+            <td>{{ abilityLabels()[ability] }}</td>
             <td>{{ service.finalAbilities()[ability].total }}</td>
             <td>{{ modifierLabel(ability) }}</td>
           </tr>
@@ -45,18 +45,18 @@
   </section>
 
   <section class="sheet-section">
-    <h2>Razza</h2>
-    <p>{{ service.selectedRace()?.name ?? 'Nessuna razza selezionata' }}</p>
+    <h2>{{ i18n.t('sheet.race') }}</h2>
+    <p>{{ raceName() }}</p>
   </section>
 
   <section class="sheet-section">
-    <h2>Classi e livelli</h2>
+    <h2>{{ i18n.t('sheet.classesAndLevels') }}</h2>
     @if (service.classLevels().length === 0) {
-      <p>Nessuna classe selezionata.</p>
+      <p>{{ i18n.t('sheet.noClass') }}</p>
     } @else {
       <ul class="class-list">
         @for (classLevel of service.classLevels(); track classLevel.classId) {
-          <li>{{ className(classLevel.classId) }} — Livello {{ classLevel.level }}</li>
+          <li>{{ className(classLevel.classId) }} — {{ i18n.t('sheet.level') }} {{ classLevel.level }}</li>
         }
       </ul>
     }
@@ -64,7 +64,7 @@
 
   @if (classLevelsWithOptions().length > 0) {
     <section class="sheet-section">
-      <h2>Opzioni di Classe</h2>
+      <h2>{{ i18n.t('sheet.classOptions') }}</h2>
       <ul class="class-list">
         @for (classLevel of classLevelsWithOptions(); track classLevel.classId) {
           <li><strong>{{ className(classLevel.classId) }}</strong>: {{ classOptionsSummary(classLevel.classId) }}</li>
@@ -73,20 +73,60 @@
     </section>
   }
 
+  @if (selectedSkills().length > 0) {
+    <section class="sheet-section">
+      <h2>{{ i18n.t('skills.title') }}</h2>
+      <ul class="class-list">
+        @for (skill of selectedSkills(); track skill.id) {
+          <li>{{ i18n.getSkillName(skill.id) }} — {{ service.skillRanks()[skill.id] }}</li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (service.selectedFeats().length > 0) {
+    <section class="sheet-section">
+      <h2>{{ i18n.t('feats.title') }}</h2>
+      <ul class="class-list">
+        @for (featId of service.selectedFeats(); track featId) {
+          <li>{{ i18n.getFeatName(featId) }}</li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (service.equippedWeapons().length > 0) {
+    <section class="sheet-section">
+      <h2>{{ i18n.t('equipment.weapons') }}</h2>
+      <ul class="class-list">
+        @for (weapon of service.equippedWeapons(); track weapon.id) {
+          <li>{{ i18n.getWeaponName(weapon.id) }}</li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (service.equippedArmor(); as armor) {
+    <section class="sheet-section">
+      <h2>{{ i18n.t('equipment.armorAndShields') }}</h2>
+      <p>{{ i18n.getArmorName(armor.id) }}</p>
+    </section>
+  }
+
   <section class="sheet-section">
-    <h2>Tiri salvezza</h2>
+    <h2>{{ i18n.t('sheet.savingThrows') }}</h2>
     <ul class="save-list">
       <li>
-        Tempra: {{ baseSaveLabel(service.baseSavingThrows().fortitude) }} (base) +
-        {{ modifierLabel('CON') }} (COS) = <strong>{{ fortitude() }}</strong>
+        {{ i18n.t('sheet.fortitudeLine', { base: baseSaveLabel(service.baseSavingThrows().fortitude), modifier: modifierLabel('CON'), code: i18n.t('abilities.short.CON') }) }}
+        <strong>{{ fortitude() }}</strong>
       </li>
       <li>
-        Riflessi: {{ baseSaveLabel(service.baseSavingThrows().reflex) }} (base) +
-        {{ modifierLabel('DEX') }} (DES) = <strong>{{ reflex() }}</strong>
+        {{ i18n.t('sheet.reflexLine', { base: baseSaveLabel(service.baseSavingThrows().reflex), modifier: modifierLabel('DEX'), code: i18n.t('abilities.short.DEX') }) }}
+        <strong>{{ reflex() }}</strong>
       </li>
       <li>
-        Volontà: {{ baseSaveLabel(service.baseSavingThrows().will) }} (base) +
-        {{ modifierLabel('WIS') }} (SAG) = <strong>{{ will() }}</strong>
+        {{ i18n.t('sheet.willLine', { base: baseSaveLabel(service.baseSavingThrows().will), modifier: modifierLabel('WIS'), code: i18n.t('abilities.short.WIS') }) }}
+        <strong>{{ will() }}</strong>
       </li>
     </ul>
   </section>
